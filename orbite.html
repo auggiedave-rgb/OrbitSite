@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" id="thc" content="#0c0f14">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Orbite</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/5.0.0/satellite.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+:root{--bg:#0c0f14;--fg:#e8eaed;--mut:#7b8490;--acc:#f2b84b;--line:#1a2029;--sea:#0c0f14;--land:#141a22;--glass:rgba(12,15,20,.92);--glass2:rgba(12,15,20,.85);--onacc:#1a1405;--btn2:#1a2029;--cs:dark;--grad:#9b7836;--org:#ff6a3d;--wht:#e8eaed;--ambl:rgba(242,184,75,.95)}
+:root[data-theme=light]{--bg:#f4f6f9;--fg:#18202a;--mut:#5a6573;--acc:#b36f00;--line:#d5dce5;--sea:#f4f6f9;--land:#d3dbe4;--glass:rgba(255,255,255,.94);--glass2:rgba(255,255,255,.9);--onacc:#fff;--btn2:#e6ebf1;--cs:light;--grad:#c98a0b;--org:#d9420f;--wht:#18202a;--ambl:rgba(179,111,0,.95)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;font-variant-numeric:tabular-nums}
+body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+header h1{font-size:17px;font-weight:600;letter-spacing:.01em}
+header #clk{margin-left:auto}
+#gear{background:none;border:0;color:var(--mut);padding:4px;margin-left:-4px;display:flex;border-radius:8px}
+#gear svg{width:20px;height:20px}
+#set{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 56px) 14px 14px}
+#set[hidden]{display:none}
+#setp{width:100%;max-width:420px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:6px 16px 10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#setp .sh{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+#setp .sh b{font-size:16px}
+#setp .sh button{background:none;border:0;color:var(--acc);font:inherit;font-weight:600;padding:4px}
+.sr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+.sr small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+.sw{position:relative;width:46px;height:28px;flex:none;border-radius:14px;background:var(--line);border:1px solid var(--mut);padding:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--mut);transition:transform .18s}
+.sw[aria-checked=true]{background:var(--acc);border-color:var(--acc)}
+.sw[aria-checked=true]::after{transform:translateX(18px);background:var(--onacc)}
+header small{color:var(--mut);font-size:12px}
+select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px}
+main{flex:1;position:relative;min-height:0;display:flex;flex-direction:column}
+#mv{position:relative;flex:1;min-height:0}
+#cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.pane{position:absolute;inset:0;background:var(--bg);overflow:auto;padding:12px 16px;display:none}
+.pane.on{display:block}
+nav{display:flex;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
+nav button{flex:1;background:none;border:0;color:var(--mut);font:inherit;font-size:14px;padding:15px 0}
+nav button.on{color:var(--acc);font-weight:600}
+#card{position:absolute;left:12px;right:12px;bottom:12px;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+#card b{font-size:16px}#card span{color:var(--mut);font-size:12px;margin-left:8px}
+.zc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.zc label{font-size:12px;color:var(--mut)}
+.zc input,.zq select{display:block;width:100%;margin-top:4px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 8px;font:inherit;font-size:13px;color-scheme:var(--cs)}
+.zq{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.zq button{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 6px;font:inherit;font-size:13px}
+.zq .go{background:var(--acc);color:var(--onacc);border-color:var(--acc);font-weight:600}
+#zres{margin-top:12px}.zs{font-size:13px;color:var(--mut);margin-bottom:6px}.zs b{color:var(--fg);font-weight:600}
+.zoom button.on{color:var(--acc);border-color:var(--acc)}
+.zoom #zb{font-size:11px;padding:0}
+.lg{margin-top:8px;font-size:0}
+.lgi{display:inline-block;position:relative;box-sizing:border-box;width:50%;padding:4px 8px 4px 36px;vertical-align:top;font-size:12px;line-height:1.3;color:var(--mut)}
+.lgi i{position:absolute;left:0;top:.75em;width:28px;height:0}
+.lgi .s-grad{height:12px;top:.35em;background:linear-gradient(90deg,var(--bg),var(--grad));border:1px solid #2a3541;box-sizing:border-box}
+.lgi .s-dash{border-top:2px dashed var(--mut)}
+.lgi .s-amb{border-top:2px solid var(--ambl)}
+.lgi .s-wht{border-top:2px solid var(--wht)}
+.lgi .s-org{border-top:4px solid var(--org);top:.65em}
+.lgi .s-band{height:10px;top:.45em;background:color-mix(in srgb,var(--acc) 40%,transparent);border:1px dashed var(--acc);box-sizing:border-box}
+.lgi .s-vert{width:0;height:16px;top:.2em;left:13px;border-left:2px dashed var(--mut)}
+#zc1,#zc2{display:block;width:100%;max-width:560px;margin:8px auto 0}
+.zn{margin-top:10px;color:var(--acc);font-size:13px;font-weight:600}
+.g{display:grid;grid-template-columns:1fr 1fr 1.5fr 1.1fr;gap:8px;margin-top:10px}
+.g div{font-size:14px}.g i{display:block;font-style:normal;color:var(--mut);font-size:11px}
+.zoom{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--glass2);color:var(--fg);font-size:20px}
+.zoom #zm{font-size:13px;font-weight:600;color:var(--acc)}
+.qr{display:flex;gap:8px;align-items:flex-start}.qr input{flex:1;min-width:0}
+#imp{background:var(--bg);color:var(--acc);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font:inherit;font-weight:600}
+#impm button{background:none;border:0;color:var(--acc);font:inherit;padding:0 0 0 6px;text-decoration:underline}
+input[type=search],.f input{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;margin-bottom:8px}
+.row{display:flex;justify-content:space-between;padding:12px 2px;border-bottom:1px solid var(--line)}
+.row span{color:var(--mut);font-size:13px}
+.row[data-i]{cursor:pointer}.row.on{color:var(--acc)}.row.on span{color:var(--acc)}
+#skc{display:block;width:100%;max-width:360px;aspect-ratio:1;margin:0 auto}
+.tb{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:6px 14px;font-size:14px;margin-top:10px}
+.tb i{font-style:normal;color:var(--mut);font-size:12px}
+.tm{flex:none;display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.tm input,.tm button{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;height:38px;font:inherit;font-size:13px}
+.tm input{flex:1;min-width:0;padding:0 8px;color-scheme:var(--cs)}
+.tm button{padding:0 9px}
+.tm .tz{font-size:12px;color:var(--mut)}
+.tm button.on{color:var(--acc);border-color:var(--acc)}
+#skyc{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:4px}
+.m{color:var(--mut)}
+.f{display:flex;gap:8px;margin:10px 0}.f input{margin:0}
+.f button,.btn{background:var(--acc);color:var(--onacc);border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:600}
+#st{color:var(--mut);font-size:12px;padding:6px 16px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Orbite</h1>
+  <button id="gear" type="button" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  <small id="clk"></small>
+  <select id="grp"></select>
+</header>
+<div id="set" hidden><div id="setp" role="dialog" aria-label="Impostazioni"><div class="sh"><b>Impostazioni</b><button id="setx" type="button">Chiudi</button></div>
+<div class="sr"><div>Modalità chiara<small>Colori chiari per l'uso alla luce del giorno</small></div><button id="swl" class="sw" type="button" role="switch" aria-checked="false" aria-label="Modalità chiara"></button></div></div></div>
+<main>
+  <div class="tm"><button id="tm">−1h</button><input type="datetime-local" id="dt"><span class="tz">UTC</span><button id="tp">+1h</button><button id="tn" class="on">Ora</button></div>
+  <div id="mv">
+    <canvas id="cv"></canvas>
+    <div class="zoom"><button id="zb">SAA</button><button id="zm">3D</button><button id="zi">+</button><button id="zo">−</button></div>
+    <div id="card" hidden></div>
+  </div>
+  <section class="pane" id="list"><div class="qr"><input type="search" id="q" placeholder="Nome o NORAD ID (Invio per cercarlo)"><button id="imp" type="button">Import</button></div><input type="file" id="impf" accept=".txt,.tle,.xml,.json,.omm,.kvn,.csv,text/plain,text/xml,application/json,application/xml" multiple hidden><div id="impm" class="m" style="font-size:12px;margin:-2px 0 8px" hidden></div><div id="rows"></div></section>
+  <section class="pane" id="pass"></section>
+  <section class="pane" id="zone"></section>
+</main>
+<div id="st"></div>
+<nav><button data-t="map" class="on">Mappa</button><button data-t="zone">Zone</button><button data-t="pass">Passaggi</button><button data-t="list">Elenco</button></nav>
+
+<script>
+const R=Math.PI/180,$=s=>document.querySelector(s);
+const GROUPS={stations:'Stazioni spaziali',weather:'Meteo','gps-ops':'GPS',science:'Scienza',geo:'Geostazionari',starlink:'Starlink','iride-b1':'IRIDE-OHB B1','iride-b2a':'IRIDE-OHB B2A'};
+// gruppi personalizzati: elenco di NORAD ID
+const CUSTOM={
+  'iride-b1':[66695,66696,66697,66698,66699,66700,66701,66702],
+  'iride-b2a':[68449,68451,68453,68461,68450,68447,68462,68452]
+};
+let sats=[],sel=null,obs=null,land=null,landV=null,m3=false,belts=false,view={lon:0,lat:0,z:1,z3:1},tab='map',group='stations';
+const cv=$('#cv'),ctx=cv.getContext('2d');let W=0,H=0;
+const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const wrap=d=>((d%360)+540)%360-180;
+const status=t=>$('#st').textContent=t;
+// ---------- tema (scuro / chiaro) ----------
+// I disegni su canvas usano colori scritti nel codice per il tema scuro: nel tema chiaro vengono tradotti qui,
+// intercettando fillStyle e strokeStyle, così ogni grafico resta leggibile senza duplicare il codice.
+let LIGHT=false;
+const TH={base:[12,15,20],amb:[242,184,75]};
+const HEXM={'#0c0f14':'#f4f6f9','#e8eaed':'#18202a','#7b8490':'#5a6573','#9aa3ae':'#47505c','#10151c':'#e8edf3','#2a3541':'#aab6c4','#18202a':'#c7d0db','#1b2430':'#c3cedb','#141a22':'#d3dbe4','#232c37':'#aab6c4','#161c24':'#dfe5ec','#1f2630':'#d3dae3','#3a4552':'#8a97a6','#f2b84b':'#b36f00','#ff6a3d':'#d9420f','#fff':'#18202a'};
+const RGBM={'232,234,237':'24,32,42','242,184,75':'179,111,0','255,106,61':'217,66,15','255,92,64':'208,52,28','0,0,0':'30,50,90'};
+const mapCol=v=>{
+  if(!LIGHT||typeof v!=='string')return v;
+  const k=v.trim().toLowerCase();
+  if(HEXM[k])return HEXM[k];
+  const m=k.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/);
+  if(m){const r=RGBM[m[1]+','+m[2]+','+m[3]];if(r){let a=+m[4];if(r==='30,50,90')a=Math.min(a,.2);return'rgba('+r+','+a+')'}}
+  return v;
+};
+['fillStyle','strokeStyle'].forEach(p=>{
+  const d=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,p);
+  Object.defineProperty(CanvasRenderingContext2D.prototype,p,{get:d.get,set(v){d.set.call(this,mapCol(v))},configurable:true});
+});
+function setTheme(light,save){
+  LIGHT=!!light;
+  document.documentElement.dataset.theme=LIGHT?'light':'dark';
+  TH.base=LIGHT?[244,246,249]:[12,15,20];TH.amb=LIGHT?[179,111,0]:[242,184,75];
+  const t=$('#thc');if(t)t.content=LIGHT?'#f4f6f9':'#0c0f14';
+  const sw=$('#swl');if(sw)sw.setAttribute('aria-checked',LIGHT);
+  if(save){try{localStorage.setItem('orbite_theme',LIGHT?'light':'dark')}catch(e){}}
+  if(typeof draw==='function'&&inited){try{draw()}catch(e){}
+    try{if(tab==='pass')renderPass();if(tab==='zone'&&zRes)zoneResults()}catch(e){}}
+}
+
+
+// ---------- dati ----------
+const TLE_OK=/^1 \d[^\n]*\r?\n2 \d/m;
+// Scarica i TLE da CelesTrak con cache locale (6 ore), timeout, un nuovo tentativo e messaggi d'errore specifici
+async function getTLE(url,key){
+  let c=null;
+  try{c=JSON.parse(localStorage.getItem(key))}catch(e){}
+  if(c&&c.t&&!TLE_OK.test(c.t))c=null;
+  if(c&&Date.now()-c.ts<216e5)return{txt:c.t,msg:'Uso i TLE salvati.'};
+  status('Scarico i TLE da CelesTrak…');
+  let err='';
+  for(let k=0;k<2;k++){
+    if(k)await new Promise(r=>setTimeout(r,1500));
+    const ac=new AbortController(),to=setTimeout(()=>ac.abort(),20000);
+    try{
+      const r=await fetch(url,{signal:ac.signal});
+      if(r.status===403||r.status===429){clearTimeout(to);err='CelesTrak ha rifiutato la richiesta (HTTP '+r.status+'): limite di scaricamenti, riprova tra circa 2 ore.';break}
+      if(!r.ok){clearTimeout(to);err='CelesTrak ha risposto con errore HTTP '+r.status+'.';continue}
+      const t=await r.text();clearTimeout(to);
+      if(/no gp data/i.test(t))return{err:'Nessun dato per questo oggetto su CelesTrak.',nf:true};
+      if(!TLE_OK.test(t)){err='CelesTrak ha risposto senza dati TLE validi.';break}
+      try{localStorage.setItem(key,JSON.stringify({ts:Date.now(),t}))}catch(e){}
+      return{txt:t,msg:'TLE aggiornati alle '+new Date().toISOString().slice(11,16)+' UTC'};
+    }catch(e){
+      clearTimeout(to);
+      err=navigator.onLine===false?'Sei offline.':e.name==='AbortError'?'CelesTrak non risponde (timeout di 20 secondi).':'Connessione a CelesTrak non riuscita (rete, oppure richiesta rifiutata per limite di scaricamenti).';
+    }
+  }
+  if(c&&c.t)return{txt:c.t,msg:'',warn:err+' Uso gli ultimi TLE salvati.'};
+  return{err};
+}
+function splitTLE(t){
+  const L=t.split(/\r?\n/).map(x=>x.trim()).filter(Boolean),out=[];
+  for(let i=0;i+2<L.length;i+=3){
+    if(/^1 \d/.test(L[i+1])&&/^2 \d/.test(L[i+2]))out.push({id:L[i+2].substr(2,5).trim(),t:L[i]+'\n'+L[i+1]+'\n'+L[i+2]});
+  }
+  return out;
+}
+// Gruppi IRIDE: una sola richiesta per nome ("IRIDE"), poi filtro sugli ID; gli ID mancanti si chiedono uno per uno
+async function loadCustom(g){
+  const ids=CUSTOM[g].map(String);
+  const r=await getTLE('https://celestrak.org/NORAD/elements/gp.php?NAME=IRIDE&FORMAT=tle','tle:name:IRIDE');
+  const blocks=r.txt?splitTLE(r.txt):[];
+  const have=new Set(blocks.map(b=>b.id));
+  for(const id of ids){
+    if(have.has(id))continue;
+    const x=await getTLE('https://celestrak.org/NORAD/elements/gp.php?CATNR='+id+'&FORMAT=tle','tle:'+id);
+    if(x.txt)splitTLE(x.txt).forEach(b=>{if(!have.has(b.id)){have.add(b.id);blocks.push(b)}});
+  }
+  const keep=blocks.filter(b=>ids.includes(b.id));
+  if(!keep.length){status(r.err||'Nessun satellite trovato su CelesTrak per questo gruppo.');return}
+  parse(keep.map(b=>b.t).join('\n'));
+  const miss=ids.filter(i=>!keep.some(b=>b.id===i));
+  status(keep.length+' satelliti su '+ids.length+(miss.length?' (mancano NORAD '+miss.join(', ')+')':'')+(r.warn?'. '+r.warn:''));
+}
+async function load(g){
+  if(g==='import'){parse(impText());status('Satelliti importati da file: '+sats.length);return}
+  if(CUSTOM[g])return loadCustom(g);
+  const r=await getTLE('https://celestrak.org/NORAD/elements/gp.php?GROUP='+g+'&FORMAT=tle','tle:'+g);
+  if(!r.txt){status(r.err);return}
+  parse(r.txt);status(r.warn||r.msg);
+}
+async function loadOne(id){
+  id=String(id).replace(/\D/g,'');if(!id)return;
+  const r=await getTLE('https://celestrak.org/NORAD/elements/gp.php?CATNR='+id+'&FORMAT=tle','tle:'+id);
+  if(!r.txt){status(r.nf?'Nessun satellite trovato con NORAD '+id+'.':r.err);return}
+  const old=gs.querySelector('option[value=one]');if(old)old.remove();
+  const o=document.createElement('option');o.value='one';o.textContent='NORAD '+id;gs.appendChild(o);gs.value='one';group='one';
+  parse(r.txt);sel=sats[0]||null;
+  if(sel&&sel.p){view.lon=sel.p.lon;view.lat=sel.p.lat}
+  update();renderPass();show('map');
+  status((sel?'Mostro solo '+sel.name+' (NORAD '+id+')':'Nessun dato valido per NORAD '+id+'.')+(r.warn?' '+r.warn:''));
+}
+function parse(t){
+  const L=t.trim().split(/\r?\n/).map(s=>s.trim());sats=[];
+  for(let i=0;i+2<L.length;i+=3){
+    try{sats.push({name:L[i].replace(/^0 /,''),rec:satellite.twoline2satrec(L[i+1],L[i+2]),id:L[i+2].substr(2,5).trim()})}catch(e){}
+  }
+  if(sats.length>1500)sats.length=1500;
+  sel=group==='stations'?(sats.find(s=>/ISS \(ZARYA\)/.test(s.name))||null):null;
+  update();renderList();
+}
+// I contorni che attraversano la linea del cambio data (180°) vengono resi continui:
+// le longitudini possono superare ±180° e la mappa li ridisegna a ±360°. Un anello che gira attorno a un polo
+// (Antartide) viene chiuso passando dal polo.
+function fixRing(r){
+  const out=[];let off=0,prev=null;
+  for(const c of r){
+    let lon=c[0]+off;
+    if(prev!==null){const d=lon-prev;if(d>180){off-=360;lon-=360}else if(d<-180){off+=360;lon+=360}}
+    out.push([lon,c[1]]);prev=lon;
+  }
+  const f=out[0],l=out[out.length-1];
+  if(Math.abs(l[0]-f[0])>180){
+    const pole=out.reduce((a,c)=>a+c[1],0)/out.length<0?-90:90;
+    out.push([l[0],pole],[f[0],pole]);
+  }
+  return out;
+}
+async function loadLand(){
+  try{
+    let j=localStorage.getItem('land');
+    if(!j){j=await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json')).text();try{localStorage.setItem('land',j)}catch(e){}}
+    const t=JSON.parse(j),f=topojson.feature(t,t.objects.land);
+    const geoms=f.features?f.features.map(x=>x.geometry):[f.geometry];land=[];
+    const raw=[];
+    geoms.forEach(g=>(g.type==='Polygon'?[g.coordinates]:g.coordinates).forEach(p=>{raw.push(p);land.push(p.map(fixRing))}));
+    landV=raw.map(p=>p.map(r=>r.map(c=>ll2v(c[0],c[1],1))));
+    draw();
+  }catch(e){}
+}
+
+// ---------- calcoli ----------
+function pos(s,d){
+  const pv=satellite.propagate(s.rec,d);if(!pv||!pv.position)return null;
+  const g=satellite.gstime(d),gd=satellite.eciToGeodetic(pv.position,g),v=pv.velocity;
+  return{lat:gd.latitude/R,lon:satellite.degreesLong(gd.longitude),alt:gd.height,v:Math.hypot(v.x,v.y,v.z)};
+}
+function sun(d){
+  const n=(d-946728e6)/864e5,L=280.46+.9856474*n,g=(357.528+.9856003*n)*R;
+  const lm=(L+1.915*Math.sin(g)+.02*Math.sin(2*g))*R,e=(23.439-4e-7*n)*R;
+  const dec=Math.asin(Math.sin(e)*Math.sin(lm))/R,ra=Math.atan2(Math.cos(e)*Math.sin(lm),Math.cos(lm))/R;
+  return{dec,lon:wrap(ra-(280.46061837+360.98564736629*n))};
+}
+function period(s){return 2*Math.PI/s.rec.no}
+function epoch(s){const y=s.rec.epochyr<57?2000+s.rec.epochyr:1900+s.rec.epochyr;return new Date(Date.UTC(y,0,1)+(s.rec.epochdays-1)*864e5)}
+// ---------- data e ora della mappa (tempo reale oppure simulato) ----------
+let simT=null;
+function NOW(){return simT==null?new Date():new Date(simT)}
+const toLocalInput=ms=>new Date(ms-new Date(ms).getTimezoneOffset()*6e4).toISOString().slice(0,16);
+function syncTime(){
+  $('#tn').classList.toggle('on',simT==null);
+  $('#clk').style.color=simT==null?'':'var(--acc)';
+  if(document.activeElement!==$('#dt'))$('#dt').value=new Date(simT==null?Date.now():simT).toISOString().slice(0,16);
+}
+function setSim(ms){simT=ms;syncTime();update()}
+function track(s){
+  const t0=NOW().getTime();
+  if(s.tr&&Math.abs(t0-s.trT)<2e4)return s.tr;
+  const P=period(s),pts=[];
+  for(let i=0;i<=120;i++){const p=pos(s,new Date(t0+i*P/120*6e4));if(p)pts.push([p.lon,p.lat,p.alt])}
+  s.trT=t0;return s.tr=pts;
+}
+
+// Orbita inerziale (ECI/TEME) di un periodo intero, ruotata nell'orientamento che la Terra ha ora:
+// è la vera ellisse dell'orbita nello spazio, non la traccia a terra. Unità: raggi terrestri.
+function track3(s){
+  const t0=NOW().getTime();
+  if(s.tr3&&Math.abs(t0-s.tr3T)<2e4)return s.tr3;
+  const P=period(s),g0=satellite.gstime(new Date(t0)),pts=[],N=240,c=Math.cos(g0),sn=Math.sin(g0);
+  for(let i=0;i<=N;i++){
+    const pv=satellite.propagate(s.rec,new Date(t0+i*P/N*6e4));if(!pv||!pv.position)continue;
+    const x=pv.position.x,y=pv.position.y;
+    pts.push([(x*c+y*sn)/6371.2,(-x*sn+y*c)/6371.2,pv.position.z/6371.2]);
+  }
+  s.tr3T=t0;return s.tr3=pts;
+}
+
+// ---------- disegno ----------
+const PT=10,PB=10;let inited=false;
+const zMin=()=>H>0?Math.max(.5,(H-PT-PB)/H):1;
+const sc=()=>H/180*view.z,px=l=>W/2+(l-view.lon)*sc(),py=l=>H/2-(l-view.lat)*sc();
+function size(){
+  const dpr=devicePixelRatio||1,r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=r.height;
+  if(H>0&&!inited){inited=true;view.z=zMin();view.lat=(PT-PB)/2/sc()}
+  if(view.z<zMin())view.z=zMin();
+  cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw();
+}
+function draw(){
+  if(!W)return;
+  ctx.clearRect(0,0,W,H);
+  if(m3){draw3();return}
+  // in 2D i poli restano visibili: sotto la barra in alto e sopra il margine in basso
+  {const k=sc(),half=H/2/k,hi=90+PT/k-half,lo=-90-PB/k+half;view.lat=lo<=hi?Math.max(lo,Math.min(hi,view.lat)):(lo+hi)/2}
+  // griglia
+  ctx.strokeStyle='#161c24';ctx.lineWidth=1;ctx.beginPath();
+  for(let l=-90;l<=90;l+=30){ctx.moveTo(0,py(l));ctx.lineTo(W,py(l))}
+  for(let l=-540;l<=540;l+=30){const X=px(l);ctx.moveTo(X,py(90));ctx.lineTo(X,py(-90))}
+  ctx.stroke();
+  // terre
+  if(land){
+    ctx.fillStyle='#141a22';ctx.strokeStyle='#232c37';
+    for(const o of[-360,0,360]){
+      ctx.beginPath();
+      for(const p of land)for(const ring of p){ring.forEach((c,i)=>{const X=px(c[0]+o),Y=py(c[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.closePath()}
+      ctx.fill('evenodd');ctx.stroke();
+    }
+  }
+  // notte
+  const s=sun(NOW().getTime()),t=Math.tan(s.dec*R)||1e-6,pts=[];
+  for(let l=-180;l<=180;l+=4)pts.push([l,Math.atan(-Math.cos((l-s.lon)*R)/t)/R]);
+  const pole=s.dec>=0?-90:90;ctx.fillStyle='rgba(0,0,0,.4)';
+  for(const o of[-360,0,360]){
+    ctx.beginPath();pts.forEach((p,i)=>{const X=px(p[0]+o),Y=py(p[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});
+    ctx.lineTo(px(180+o),py(pole));ctx.lineTo(px(-180+o),py(pole));ctx.closePath();ctx.fill();
+  }
+  // traccia orbita
+  if(sel){
+    const tr=track(sel);ctx.strokeStyle='rgba(242,184,75,.75)';ctx.lineWidth=1.5;
+    for(const o of[-360,0,360]){
+      ctx.beginPath();
+      tr.forEach((p,i)=>{const X=px(p[0]+o),Y=py(p[1]);if(i===0||Math.abs(p[0]-tr[i-1][0])>180)ctx.moveTo(X,Y);else ctx.lineTo(X,Y)});
+      ctx.stroke();
+    }
+  }
+  // osservatore
+  if(obs){const X=W/2+wrap(obs.lon-view.lon)*sc(),Y=py(obs.lat);ctx.strokeStyle='#7b8490';ctx.lineWidth=1.5;ctx.strokeRect(X-4,Y-4,8,8)}
+  // satelliti
+  const few=sats.length<=40,lab=[];ctx.font='11px system-ui';
+  for(const q of sats){
+    q.X=q.Y=-99;const p=q.p;if(!p||q===sel)continue;
+    const X=W/2+wrap(p.lon-view.lon)*sc(),Y=py(p.lat);q.X=X;q.Y=Y;
+    if(X<-10||X>W+10||Y<-10||Y>H+10)continue;
+    ctx.fillStyle='rgba(232,234,237,.75)';ctx.beginPath();ctx.arc(X,Y,2,0,7);ctx.fill();
+    if(few)lab.push(q);
+  }
+  if(sel&&sel.p){
+    const X=W/2+wrap(sel.p.lon-view.lon)*sc(),Y=py(sel.p.lat);sel.X=X;sel.Y=Y;
+    ctx.fillStyle='#f2b84b';ctx.beginPath();ctx.arc(X,Y,5,0,7);ctx.fill();
+    ctx.strokeStyle='rgba(242,184,75,.4)';ctx.beginPath();ctx.arc(X,Y,10,0,7);ctx.stroke();
+    if(few)lab.push(sel);
+  }
+  if(few)drawLabels(lab);
+}
+// Etichette: i satelliti a meno di 8 px l'uno dall'altro (es. moduli e veicoli agganciati a una stazione) ricevono una sola etichetta con "+N"
+function drawLabels(list){
+  const cl=[];
+  for(const s of list){const c=cl.find(c=>(c.s.X-s.X)**2+(c.s.Y-s.Y)**2<64);if(c)c.n.push(s);else cl.push({s,n:[s]})}
+  for(const c of cl){
+    const rep=c.n.includes(sel)?sel:c.n[0],t=rep.name+(c.n.length>1?' +'+(c.n.length-1):'');
+    if(rep===sel){ctx.fillStyle='#e8eaed';ctx.font='12px system-ui';ctx.fillText(t,rep.X+14,rep.Y+4)}
+    else{ctx.fillStyle='#7b8490';ctx.font='11px system-ui';ctx.fillText(t,rep.X+6,rep.Y+3)}
+  }
+}
+// ---------- vista 3D (proiezione ortografica) ----------
+function ll2v(lon,lat,r){const a=lon*R,b=lat*R;return[r*Math.cos(b)*Math.cos(a),r*Math.cos(b)*Math.sin(a),r*Math.sin(b)]}
+function zoomBy(f){if(m3)view.z3=Math.max(.12,Math.min(4,view.z3*f));else view.z=Math.max(zMin(),Math.min(8,view.z*f))}
+// Ritaglia un anello sull'emisfero visibile (x' >= 0). I tratti visibili vengono ricongiunti lungo il bordo del disco:
+// dalla fine di ciascun tratto si va, nel verso dell'anello, al primo ingresso successivo. dir=1 per i contorni delle terre,
+// dir=-1 per i buchi (laghi, mari interni). Restituisce una lista di contorni chiusi in coordinate [x',y',z'].
+function clipRing(q,dir){
+  const n=q.length,TAU=2*Math.PI;let s0=-1;
+  for(let i=0;i<n;i++)if(q[i][0]>=0&&q[(i+n-1)%n][0]<0){s0=i;break}
+  if(s0<0)return q[0][0]>=0?[q]:[];
+  const cut=(A,B)=>{const t=A[0]/(A[0]-B[0]),y=A[1]+t*(B[1]-A[1]),z=A[2]+t*(B[2]-A[2]),d=Math.hypot(y,z)||1;return[0,y/d,z/d]};
+  const segs=[];let cur=[cut(q[(s0+n-1)%n],q[s0]),q[s0]];
+  for(let k=0;k<n-1;k++){
+    const A=q[(s0+k)%n],B=q[(s0+k+1)%n],ai=A[0]>=0,bi=B[0]>=0;
+    if(ai&&bi)cur.push(B);
+    else if(ai){cur.push(cut(A,B));segs.push(cur);cur=null}
+    else if(bi)cur=[cut(A,B),B];
+  }
+  if(cur)segs.push(cur);
+  const ang=p=>Math.atan2(-p[2],p[1]),sa=segs.map(g=>ang(g[0])),ea=segs.map(g=>ang(g[g.length-1])),used=segs.map(()=>false),out=[];
+  for(let i=0;i<segs.length;i++){
+    if(used[i])continue;
+    const loop=[];let c=i,guard=0;
+    do{
+      used[c]=true;for(const p of segs[c])loop.push(p);
+      let best=-1,bd=1e9;
+      for(let j=0;j<segs.length;j++){
+        if(used[j]&&j!==i)continue;
+        const d=(((dir>0?sa[j]-ea[c]:ea[c]-sa[j])%TAU)+TAU)%TAU;if(d<bd){bd=d;best=j}
+      }
+      if(best<0)break;
+      const m=Math.ceil(bd/(Math.PI/36));
+      for(let t=1;t<m;t++){const a=ea[c]+dir*bd*t/m;loop.push([0,Math.cos(a),-Math.sin(a)])}
+      c=best;
+    }while(c!==i&&++guard<=segs.length);
+    out.push(loop);
+  }
+  return out;
+}
+// ---------- Fasce di Van Allen: gusci L attorno al dipolo eccentrico ----------
+// Centro del dipolo eccentrico (Fraser-Smith 1987) dai coefficienti di grado 1 e 2: raggi terrestri, assi geografici
+function eccDipole(co){
+  const g10=co[0],g11=co[1],h11=co[2],g20=co[3],g21=co[4],h21=co[5],g22=co[6],h22=co[7],s3=Math.sqrt(3),B2=g10*g10+g11*g11+h11*h11;
+  const L0=2*g10*g20+s3*(g11*g21+h11*h21),L1=-g11*g20+s3*(g10*g21+g11*g22+h11*h22),L2=-h11*g20+s3*(g10*h21+g11*h22-h11*g22);
+  const E=(L0*g10+L1*g11+L2*h11)/(4*B2);
+  return[(L1-g11*E)/(3*B2),(L2-h11*E)/(3*B2),(L0-g10*E)/(3*B2)];
+}
+const BELT_L=[1.2];let beltC=null;   // solo il guscio più interno: è quello che si abbassa sul Sud Atlantico e dà origine alla SAA
+function beltModel(d){
+  const M=magCache(d);if(beltC&&beltC.key===M.key)return beltC;
+  const dd=eccDipole(M.co),P=ll2v(M.pole.lon,M.pole.lat,1),n1=Math.hypot(P[0],P[1])||1,e1=[-P[1]/n1,P[0]/n1,0];
+  const e2=[P[1]*e1[2]-P[2]*e1[1],P[2]*e1[0]-P[0]*e1[2],P[0]*e1[1]-P[1]*e1[0]];
+  // punto del guscio L a latitudine magnetica lam e longitudine magnetica phi (gradi)
+  const at=(L,lam,phi)=>{
+    const l=lam*R,f=phi*R,r=L*Math.cos(l)*Math.cos(l),c=r*Math.cos(l)*Math.cos(f),q=r*Math.cos(l)*Math.sin(f),z=r*Math.sin(l);
+    return[dd[0]+c*e1[0]+q*e2[0]+z*P[0],dd[1]+c*e1[1]+q*e2[1]+z*P[1],dd[2]+c*e1[2]+q*e2[2]+z*P[2]];
+  };
+  const lines=[],pt=(p)=>{const r=Math.hypot(p[0],p[1],p[2]);return r>=1?[p[0],p[1],p[2],(r-1)*6371.2]:null};
+  for(const L of BELT_L){
+    for(let phi=0;phi<360;phi+=20){const pts=[];for(let lam=-70;lam<=70;lam+=2)pts.push(pt(at(L,lam,phi)));lines.push(pts)}
+    const ring=[];for(let phi=0;phi<=360;phi+=5)ring.push(pt(at(L,0,phi)));lines.push(ring);   // anello sull'equatore magnetico
+  }
+  // impronta della SAA sulla superficie (campo sotto la soglia a 500 km)
+  const saa=[];
+  for(let la=-65;la<=20;la+=2)for(let lo=-130;lo<=45;lo+=2){const q=saaRatio(la,lo,500,M.co);if(q<1)saa.push([...ll2v(lo,la,1.001),q])}
+  // quota del guscio L=1,2 all'equatore magnetico: minima e massima al variare della longitudine
+  let mn={h:1e9},mx={h:-1e9};
+  for(let phi=0;phi<360;phi++){
+    const p=at(1.2,0,phi),r=Math.hypot(p[0],p[1],p[2]),o={h:(r-1)*6371.2,lat:Math.asin(p[2]/r)/R,lon:Math.atan2(p[1],p[0])/R};
+    if(o.h<mn.h)mn=o;if(o.h>mx.h)mx=o;
+  }
+  const off=Math.hypot(dd[0],dd[1],dd[2]);
+  return beltC={key:M.key,lines,saa,mn,mx,off:off*6371.2,offLat:Math.asin(dd[2]/off)/R,offLon:Math.atan2(dd[1],dd[0])/R};
+}
+function draw3(){
+  const Rp=Math.min(W,H)*.36*view.z3,cx=W/2,cy=H*.46;
+  const l0=view.lon*R,p0=view.lat*R,cl=Math.cos(l0),sl=Math.sin(l0),cp=Math.cos(p0),sp=Math.sin(p0);
+  // restituisce [X,Y,profondità,raggio² sullo schermo]
+  const P=(v)=>{const x1=v[0]*cl+v[1]*sl,y1=-v[0]*sl+v[1]*cl,xd=x1*cp+v[2]*sp,zd=-x1*sp+v[2]*cp;return[cx+y1*Rp,cy-zd*Rp,xd,y1*y1+zd*zd]};
+  // sfera
+  ctx.beginPath();ctx.arc(cx,cy,Rp,0,7);ctx.fillStyle='#10151c';ctx.fill();
+  ctx.strokeStyle='#2a3541';ctx.lineWidth=1;ctx.stroke();
+  // griglia
+  ctx.strokeStyle='#18202a';ctx.beginPath();
+  const seg=a=>{let on=false;for(const v of a){const q=P(v);if(q[2]>=0){on?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);on=true}else on=false}};
+  for(let l=-180;l<180;l+=30){const a=[];for(let t=-90;t<=90;t+=6)a.push(ll2v(l,t,1));seg(a)}
+  for(let t=-60;t<=60;t+=30){const a=[];for(let l=-180;l<=180;l+=6)a.push(ll2v(l,t,1));seg(a)}
+  ctx.stroke();
+  // terre: ogni contorno viene ritagliato sull'emisfero visibile
+  if(landV){
+    const V=v=>{const x1=v[0]*cl+v[1]*sl,y1=-v[0]*sl+v[1]*cl;return[x1*cp+v[2]*sp,y1,-x1*sp+v[2]*cp]};
+    ctx.beginPath();
+    for(const p of landV)p.forEach((ring,ri)=>{
+      for(const lp of clipRing(ring.map(V),ri?-1:1)){
+        lp.forEach((u,i)=>{const X=cx+u[1]*Rp,Y=cy-u[2]*Rp;i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});
+        ctx.closePath();
+      }
+    });
+    ctx.fillStyle='#1b2430';ctx.strokeStyle='#2a3541';ctx.fill('evenodd');ctx.stroke();
+  }
+  // posizione dell'osservatore
+  if(obs){const q=P(ll2v(obs.lon,obs.lat,1));if(q[2]>0){ctx.strokeStyle='#7b8490';ctx.lineWidth=1.5;ctx.strokeRect(q[0]-4,q[1]-4,8,8)}}
+  // fasce di Van Allen (gusci L): rosso dove sono vicine alla superficie, ambra più in alto
+  if(belts){
+    const B=beltModel(NOW()),cls=[[1000,'rgba(255,92,64,.95)'],[1e9,'rgba(242,184,75,.85)']];
+    const pr=B.lines.map(l=>l.map(p=>{if(!p)return null;const q=P(p);return q[2]<0&&q[3]<1?null:[q[0],q[1],p[3]]}));
+    const ds=Math.max(2.2,Rp*.045);ctx.fillStyle='rgba(255,92,64,.3)';
+    for(const p of B.saa){const q=P(p);if(q[2]>0)ctx.fillRect(q[0]-ds/2,q[1]-ds/2,ds,ds)}
+    ctx.lineWidth=1.2;
+    cls.forEach(([hm,col],ci)=>{
+      const lo=ci?cls[ci-1][0]:-1;ctx.beginPath();ctx.strokeStyle=col;
+      for(const l of pr)for(let i=1;i<l.length;i++){const a=l[i-1],b=l[i];if(!a||!b)continue;const h=(a[2]+b[2])/2;if(h>lo&&h<=hm){ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1])}}
+      ctx.stroke();
+    });
+    ctx.fillStyle='#7b8490';ctx.font='11px system-ui';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    const sa=B.mn.lat<0&&B.mn.lon>-100&&B.mn.lon<30;
+    ctx.fillText('Fascia interna di Van Allen (guscio L = 1,2)',12,18);
+    ctx.fillText('L = 1,2: quota da '+Math.round(B.mn.h)+' km (lon '+Math.round(B.mn.lon)+'°) a '+Math.round(B.mx.h)+' km (lon '+Math.round(B.mx.lon)+'°)',12,33);
+    ctx.fillStyle='rgba(255,92,64,.9)';
+    ctx.fillText(sa?'La fascia si abbassa sul Sud Atlantico: lì nasce la SAA':'Impronta della SAA',12,48);
+    ctx.fillStyle='rgba(255,92,64,.95)';ctx.fillRect(12,57,14,3);
+    ctx.fillStyle='rgba(242,184,75,.9)';ctx.fillRect(12,70,14,3);
+    ctx.fillStyle='rgba(255,92,64,.5)';ctx.fillRect(12,81,14,8);
+    ctx.fillStyle='#9aa3ae';ctx.fillText('fascia sotto i 1000 km di quota',32,62);ctx.fillText('fascia sopra i 1000 km',32,75);ctx.fillText('area della SAA a 500 km',32,89);
+  }
+  // orbita del satellite selezionato nello spazio inerziale (ECI); la parte dietro la Terra è attenuata
+  if(sel){
+    const qs=track3(sel).map(p=>{const q=P(p);q.h=q[2]<0&&q[3]<1;return q});
+    ctx.lineWidth=1.5;
+    for(const back of[true,false]){
+      ctx.beginPath();ctx.strokeStyle=back?'rgba(242,184,75,.18)':'rgba(242,184,75,.85)';
+      for(let i=1;i<qs.length;i++){const a=qs[i-1],b=qs[i];if((a.h&&b.h)!==back)continue;ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1])}
+      ctx.stroke();
+    }
+  }
+  // satelliti
+  const few=sats.length<=40,lab=[];ctx.font='11px system-ui';
+  for(const s of sats){
+    s.X=s.Y=-99;const p=s.p;if(!p||s===sel)continue;
+    const q=P(ll2v(p.lon,p.lat,1+p.alt/6371));if(q[2]<0&&q[3]<1)continue;
+    s.X=q[0];s.Y=q[1];
+    ctx.fillStyle='rgba(232,234,237,.8)';ctx.beginPath();ctx.arc(q[0],q[1],2,0,7);ctx.fill();
+    if(few)lab.push(s);
+  }
+  if(sel&&sel.p){
+    const t3=track3(sel),q=P(t3.length?t3[0]:ll2v(sel.p.lon,sel.p.lat,1+sel.p.alt/6371)),hid=q[2]<0&&q[3]<1;
+    if(!hid){
+      sel.X=q[0];sel.Y=q[1];
+      ctx.fillStyle='#f2b84b';ctx.beginPath();ctx.arc(q[0],q[1],5,0,7);ctx.fill();
+      ctx.strokeStyle='rgba(242,184,75,.4)';ctx.beginPath();ctx.arc(q[0],q[1],10,0,7);ctx.stroke();
+      if(few)lab.push(sel);
+    }
+  }
+  if(few)drawLabels(lab);
+}
+// ---------- Stato sotto il satellite ----------
+// Nomi in italiano per i paesi dei dati world-atlas (gli altri restano con il nome originale)
+const IT={"W. Sahara":"Sahara Occidentale","United States of America":"Stati Uniti","Kazakhstan":"Kazakistan","Papua New Guinea":"Papua Nuova Guinea","Chile":"Cile","Dem. Rep. Congo":"Rep. Dem. del Congo","Chad":"Ciad","Dominican Rep.":"Rep. Dominicana","Falkland Is.":"Isole Falkland","Norway":"Norvegia","Greenland":"Groenlandia","Fr. S. Antarctic Lands":"Terre Australi Francesi","Timor-Leste":"Timor Est","South Africa":"Sudafrica","Mexico":"Messico","Brazil":"Brasile","Peru":"Perù","France":"Francia","Jamaica":"Giamaica","Cameroon":"Camerun","Côte d'Ivoire":"Costa d'Avorio","Central African Rep.":"Rep. Centrafricana","Congo":"Rep. del Congo","Eq. Guinea":"Guinea Equatoriale","Mozambique":"Mozambico","eSwatini":"Eswatini","Israel":"Israele","Lebanon":"Libano","Jordan":"Giordania","United Arab Emirates":"Emirati Arabi Uniti","Cambodia":"Cambogia","Thailand":"Thailandia","North Korea":"Corea del Nord","South Korea":"Corea del Sud","Tajikistan":"Tagikistan","Kyrgyzstan":"Kirghizistan","Syria":"Siria","Sweden":"Svezia","Belarus":"Bielorussia","Ukraine":"Ucraina","Poland":"Polonia","Hungary":"Ungheria","Lithuania":"Lituania","Latvia":"Lettonia","Germany":"Germania","Greece":"Grecia","Turkey":"Turchia","Croatia":"Croazia","Switzerland":"Svizzera","Luxembourg":"Lussemburgo","Belgium":"Belgio","Netherlands":"Paesi Bassi","Portugal":"Portogallo","Spain":"Spagna","Ireland":"Irlanda","New Caledonia":"Nuova Caledonia","Solomon Is.":"Isole Salomone","New Zealand":"Nuova Zelanda","China":"Cina","Italy":"Italia","Denmark":"Danimarca","United Kingdom":"Regno Unito","Iceland":"Islanda","Azerbaijan":"Azerbaigian","Philippines":"Filippine","Finland":"Finlandia","Slovakia":"Slovacchia","Czechia":"Rep. Ceca","Japan":"Giappone","Saudi Arabia":"Arabia Saudita","Antarctica":"Antartide","N. Cyprus":"Cipro del Nord","Cyprus":"Cipro","Morocco":"Marocco","Egypt":"Egitto","Libya":"Libia","Ethiopia":"Etiopia","Djibouti":"Gibuti","Bosnia and Herz.":"Bosnia ed Erzegovina","Macedonia":"Macedonia del Nord","Trinidad and Tobago":"Trinidad e Tobago","S. Sudan":"Sudan del Sud","Fiji":"Figi","Palestine":"Palestina"};
+let CT=null;
+function inRing(r,x,y){let c=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
+async function loadCountries(){
+  try{
+    let j=localStorage.getItem('countries');
+    if(!j){j=await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')).text();try{localStorage.setItem('countries',j)}catch(e){}}
+    const t=JSON.parse(j),f=topojson.feature(t,t.objects.countries);
+    CT=f.features.map(ft=>{
+      const g=ft.geometry,polys=(g.type==='Polygon'?[g.coordinates]:g.coordinates).map(p=>{
+        const rings=p.map(fixRing);let a=1e9,b=-1e9,c=1e9,d=-1e9;
+        for(const q of rings[0]){if(q[0]<a)a=q[0];if(q[0]>b)b=q[0];if(q[1]<c)c=q[1];if(q[1]>d)d=q[1]}
+        return{rings,a,b,c,d};
+      });
+      return{name:IT[ft.properties.name]||ft.properties.name,polys};
+    });
+    card();
+  }catch(e){}
+}
+// Stato che si trova sotto il punto (lat, lon), oppure null
+function countryAt(lat,lon){
+  if(!CT)return null;
+  for(const c of CT)for(const p of c.polys){
+    if(lat<p.c||lat>p.d)continue;
+    for(const o of[0,360,-360]){
+      const x=lon+o;if(x<p.a||x>p.b)continue;
+      let n=0;for(const r of p.rings)if(inRing(r,x,lat))n++;
+      if(n%2)return c.name;
+    }
+  }
+  return null;
+}
+// Mare o oceano, in modo approssimato (solo per i punti senza Stato)
+// Linea approssimata di separazione tra Atlantico e Pacifico lungo le Americhe: [latitudine, longitudine]
+const AMER=[[-60,-67],[-56,-67],[-30,-65],[0,-70],[8,-80],[12,-87],[17,-93],[22,-100],[31,-105],[60,-105]];
+function amerLon(lat){for(let i=1;i<AMER.length;i++){const a=AMER[i-1],b=AMER[i];if(lat<=b[0])return a[1]+(b[1]-a[1])*(lat-a[0])/(b[0]-a[0])}return -105}
+function waterAt(lat,lon){
+  const B=(a,b,c,d)=>lat>=a&&lat<=b&&lon>=c&&lon<=d;
+  if(lat>=70)return'Oceano Artico';
+  if(lat<=-60)return'Oceano Meridionale';
+  if(B(41,47,27.5,41.8))return'Mar Nero';
+  if(B(36.5,47.2,46.5,54.5))return'Mar Caspio';
+  if(B(54,66,9.5,30.5))return'Mar Baltico';
+  if(B(30,46,-5.6,36.5))return'Mar Mediterraneo';
+  if(B(12,28.5,32.5,43.5))return'Mar Rosso';
+  if(B(17,31,-98,-80))return'Golfo del Messico';
+  if(lon>=147)return'Oceano Pacifico';
+  if(lon>=114)return lat>-10?'Oceano Pacifico':'Oceano Indiano';
+  if(lon>=20)return lat<30?'Oceano Indiano':'Mare aperto';
+  return lon<amerLon(lat)?'Oceano Pacifico':'Oceano Atlantico';
+}
+// Distanza massima (km) entro cui un punto sul mare viene associato al paese più vicino
+const NEAR_KM=100;
+// Paese con il confine più vicino al punto (lat, lon), entro maxKm, e distanza in km; null se nessuno
+function nearestCountry(lat,lon,maxKm){
+  if(!CT)return null;
+  const kx=111.32*Math.cos(lat*R),ky=110.57,dl=Math.min(180,maxKm/Math.max(kx,1)),dp=maxKm/ky;
+  let best=null,bd=maxKm;
+  for(const c of CT)for(const p of c.polys){
+    if(lat<p.c-dp||lat>p.d+dp)continue;
+    for(const o of[0,360,-360]){
+      const x=lon+o;if(x<p.a-dl||x>p.b+dl)continue;
+      for(const r of p.rings)for(let i=1;i<r.length;i++){
+        const ax=(r[i-1][0]-x)*kx,ay=(r[i-1][1]-lat)*ky,dx=(r[i][0]-r[i-1][0])*kx,dy=(r[i][1]-r[i-1][1])*ky,L=dx*dx+dy*dy;
+        let t=L?-(ax*dx+ay*dy)/L:0;t=t<0?0:t>1?1:t;
+        const d=Math.hypot(ax+t*dx,ay+t*dy);
+        if(d<bd){bd=d;best=c.name}
+      }
+    }
+  }
+  return best?{name:best,km:bd}:null;
+}
+// Testo (HTML) per la riga "Sopra": Stato, oppure mare/oceano e, se la costa è vicina, il paese e la distanza
+function whereIs(lat,lon){
+  if(!CT)return'…';
+  const c=countryAt(lat,lon);if(c)return esc(c);
+  const w=esc(waterAt(lat,lon)),n=nearestCountry(lat,lon,NEAR_KM);
+  return n?w+'<br><span class="m" style="font-size:12px">vicino: '+esc(n.name)+', '+Math.max(1,Math.round(n.km/5)*5)+' km</span>':w;
+}
+// ---------- Zone di radiazione: SAA e cuspidi polari ----------
+// Coefficienti IGRF-14 (gradi 1-13) per le epoche 2025.0 e 2030.0, in nT; per le date intermedie si interpola
+const IGRF25=[-29350,-1410.3,4545.5,-2556.2,2950.9,-3133.6,1648.7,-814.2,1360.9,-2404.2,-56.9,1243.8,237.6,453.4,-549.6,894.7,799.6,278.6,55.8,-134,-281.1,212,12,-375.4,-232.9,369,45.3,187.2,220,-138.7,-122.9,-141.9,42.9,20.9,106.2,64.3,63.8,-18.4,76.7,16.8,-115.7,48.9,-40.9,-59.8,14.9,10.9,-60.8,72.8,79.6,-76.9,-48.9,-8.8,-14.4,59.3,-1,15.8,23.5,2.5,-7.4,-11.2,-25.1,14.3,-2.2,23.1,10.9,7.2,-17.5,-12.6,2,11.5,-21.8,-9.7,16.9,12.7,14.9,0.7,-16.8,-5.2,1,3.9,4.7,8,-24.8,3,12.1,-0.2,8.3,-2.5,-3.4,-13.1,-5.3,2.4,7.2,8.6,-0.6,-8.7,0.8,-12.8,9.8,-1.3,-6.4,3.3,0.2,0.1,2,2.5,-1,5.4,-0.5,-9,-0.9,0.4,1.5,-4.2,0.9,-3.8,-2.6,0.9,-3.9,-9,3,-1.4,0,-2.5,2.8,2.4,-0.6,-0.6,0.1,0,0.5,-0.6,-0.3,-0.1,-1.2,1.1,-1.7,-1,-2.9,-0.1,-1.8,2.6,-2.3,-2,-0.1,-1.2,0.4,0.6,1.2,1,-1.2,-1.5,0.6,0,0.5,0.6,0.5,-0.2,-0.1,0.8,-0.5,0.1,-0.2,-0.9,-1.2,0.1,-0.7,0.2,0.2,-0.9,-0.9,0.6,0.7,0.7,1.2,-0.2,-0.3,0.5,-1.3,0.1,-0.1,0.7,0.2,0,-0.2,0.3,0.5,0.2,0.6,0.4,-0.6,-0.5,-0.3,-0.4,-0.5],IGRF30=[-29287,-1360.3,4438,-2612.2,2924.4,-3270.1,1607.2,-869.7,1353.4,-2426.2,-37.9,1245.8,236.6,375.4,-569.1,886.2,788.1,272.1,26.8,-113.5,-254.1,220,-22,-395.9,-229.9,375.5,42.8,187.2,230.5,-135.2,-120.4,-130.4,51.4,25.9,115.7,63.3,62.3,-16.9,80.7,8.8,-109.7,46.9,-44.9,-55.8,16.9,14.4,-56.3,77.3,79.1,-77.4,-45.9,-9.3,-11.9,61.8,-4.5,15.3,23.5,-1.5,-11.9,-15.2,-22.6,18.8,-3.7,22.6,11.9,5.7,-17.5,-10.6,4,10,-22.3,-7.7,18.4,10.2,15.4,-2.3,-16.8,-3.7,2.5,4.9,4.7,8,-24.8,3,12.1,-0.2,8.3,-2.5,-3.4,-13.1,-5.3,2.4,7.2,8.6,-0.6,-8.7,0.8,-12.8,9.8,-1.3,-6.4,3.3,0.2,0.1,2,2.5,-1,5.4,-0.5,-9,-0.9,0.4,1.5,-4.2,0.9,-3.8,-2.6,0.9,-3.9,-9,3,-1.4,0,-2.5,2.8,2.4,-0.6,-0.6,0.1,0,0.5,-0.6,-0.3,-0.1,-1.2,1.1,-1.7,-1,-2.9,-0.1,-1.8,2.6,-2.3,-2,-0.1,-1.2,0.4,0.6,1.2,1,-1.2,-1.5,0.6,0,0.5,0.6,0.5,-0.2,-0.1,0.8,-0.5,0.1,-0.2,-0.9,-1.2,0.1,-0.7,0.2,0.2,-0.9,-0.9,0.6,0.7,0.7,1.2,-0.2,-0.3,0.5,-1.3,0.1,-0.1,0.7,0.2,0,-0.2,0.3,0.5,0.2,0.6,0.4,-0.6,-0.5,-0.3,-0.4,-0.5];
+// Campo magnetico terrestre (IGRF-14, grado 13): intensità totale |B| in nT per un punto geodetico
+function igrfCoefs(year){const t=(year-2025)/5;return IGRF25.map((c,i)=>c+(IGRF30[i]-c)*t)}
+const IP=Array.from({length:14},()=>new Float64Array(14)),IDP=Array.from({length:14},()=>new Float64Array(14)),ICM=new Float64Array(14),ISM=new Float64Array(14);
+function igrfB(latDeg,lonDeg,hKm,co){
+  const phi=latDeg*R,sp=Math.sin(phi),cp=Math.cos(phi),e2=.00669437999014,Nn=6378.137/Math.sqrt(1-e2*sp*sp);
+  const x=(Nn+hKm)*cp,z=(Nn*(1-e2)+hKm)*sp,r=Math.sqrt(x*x+z*z),th=Math.atan2(x,z),ph=lonDeg*R;
+  const ct=Math.cos(th),st=Math.sin(th),ar=6371.2/r;
+  for(let m=0;m<=13;m++){ICM[m]=Math.cos(m*ph);ISM[m]=Math.sin(m*ph)}
+  IP[0][0]=1;IDP[0][0]=0;
+  let Br=0,Bt=0,Bp=0,k=0,ap=ar*ar;
+  for(let n=1;n<=13;n++){
+    ap*=ar;const Pn=IP[n],dPn=IDP[n],P1=IP[n-1],dP1=IDP[n-1],P2=n>=2?IP[n-2]:null,dP2=n>=2?IDP[n-2]:null;
+    for(let m=0;m<=n;m++){
+      if(n===m){const f=n===1?1:Math.sqrt(1-1/(2*n));Pn[n]=f*st*P1[n-1];dPn[n]=f*(st*dP1[n-1]+ct*P1[n-1])}
+      else{
+        const d=Math.sqrt(n*n-m*m),q=n>=2?Math.sqrt((n+m-1)*(n-m-1)):0;
+        Pn[m]=((2*n-1)*ct*P1[m]-(P2?q*P2[m]:0))/d;
+        dPn[m]=((2*n-1)*(ct*dP1[m]-st*P1[m])-(dP2?q*dP2[m]:0))/d;
+      }
+      const g=co[k++],h=m?co[k++]:0,cm=ICM[m],sm=ISM[m],w=g*cm+h*sm;
+      Br+=ap*(n+1)*w*Pn[m];Bt-=ap*w*dPn[m];Bp+=ap*m*(g*sm-h*cm)*Pn[m]/st;
+    }
+  }
+  return Math.sqrt(Br*Br+Bt*Bt+Bp*Bp);
+}
+// Coordinate geomagnetiche con il dipolo centrato, ricavato dai coefficienti di grado 1
+function magPole(co){const g=co[0],a=co[1],b=co[2],B0=Math.hypot(g,a,b);return{lat:90-Math.acos(-g/B0)/R,lon:Math.atan2(b,a)/R+180}}
+function geoToMag(lat,lon,pole){
+  const f=lat*R,l=(lon-pole.lon)*R,pf=pole.lat*R;
+  const x1=Math.cos(f)*Math.cos(l),y1=Math.cos(f)*Math.sin(l),z1=Math.sin(f);
+  const x2=x1*Math.sin(pf)-z1*Math.cos(pf),z2=x1*Math.cos(pf)+z1*Math.sin(pf);
+  return{lat:Math.asin(Math.max(-1,Math.min(1,z2)))/R,lon:Math.atan2(y1,x2)/R};
+}
+// Zone indicative in cui si trova il punto sub-satellite p (lat, lon, alt) alla data d.
+// SAA (South Atlantic Anomaly): campo totale sotto 22 000 nT a 535 km, riscalato con la quota (come r^-3), fino a 2000 km.
+// Cuspidi: latitudine geomagnetica 75-82°, ora locale magnetica 9:30-14:00.
+const CUSP=[75,82,9.5,14];   // finestra della cuspide: latitudine geomagnetica min/max (°), ora locale magnetica min/max (h)
+let ZC={key:null};
+// coefficienti IGRF e polo geomagnetico per la data d (cambiano di pochissimo in ore, quindi in cache)
+function magCache(d){
+  const t=d.getTime(),yr=d.getUTCFullYear()+(t-Date.UTC(d.getUTCFullYear(),0,1))/(365.25*864e5),key=Math.round(yr*500);
+  if(ZC.key!==key){const c=igrfCoefs(key/500);ZC={key,co:c,pole:magPole(c)}}
+  return ZC;
+}
+// Soglia SAA a quota h (km) e rapporto B/soglia nel punto: minore di 1 = dentro l'anomalia (9 = fuori dalla regione o oltre 2000 km)
+const saaT=h=>22000*Math.pow(6906.2/(6371.2+h),3);
+function saaRatio(lat,lon,h,co){return(h>2000||lat<=-65||lat>=20||lon<=-130||lon>=45)?9:igrfB(lat,lon,h,co)/saaT(h)}
+function spaceZone(p,d){
+  const out=[],t=d.getTime(),M=magCache(d),co=M.co;
+  if(saaRatio(p.lat,p.lon,p.alt,co)<1)out.push('SAA, South Atlantic Anomaly');
+  const pole=M.pole,m=geoToMag(p.lat,p.lon,pole),sn=sun(t),ms=geoToMag(sn.dec,sn.lon,pole);
+  const mlt=(((12+(m.lon-ms.lon)/15)%24)+24)%24,al=Math.abs(m.lat);
+  if(al>=CUSP[0]&&al<=CUSP[1]&&mlt>=CUSP[2]&&mlt<=CUSP[3])out.push('Cuspide polare '+(m.lat>0?'nord':'sud'));
+  return out;
+}
+function card(){
+  const c=$('#card');
+  if(!sel||!sel.p||tab!=='map'){c.hidden=true;return}
+  const p=sel.p,i=sel.rec.inclo/R;c.hidden=false;
+  const dd=Math.abs(NOW()-epoch(sel))/864e5,warn=dd>7?'<div class="m" style="font-size:12px;margin-top:8px">Attenzione: la data è a '+Math.round(dd)+' giorni dall’epoca del TLE, la posizione è poco precisa.</div>':'';
+  const it=[['Latitudine',p.lat.toFixed(2)+'°'],['Longitudine',p.lon.toFixed(2)+'°'],['Sopra',whereIs(p.lat,p.lon),1],['Epoca TLE',epoch(sel).toISOString().slice(0,10)],
+    ['Quota',Math.round(p.alt)+' km'],['Velocità',p.v.toFixed(2)+' km/s'],['Periodo',period(sel).toFixed(1)+' min'],['Inclinazione',i.toFixed(1)+'°']];
+  const near=sats.filter(o=>o!==sel&&o.p&&Math.abs(o.p.lat-p.lat)<.3&&Math.abs(wrap(o.p.lon-p.lon))<.3/Math.max(.2,Math.cos(p.lat*R))&&Math.abs(o.p.alt-p.alt)<30).map(o=>o.name);
+  const nearH=near.length?'<div class="m" style="font-size:12px;margin-top:8px">Nello stesso punto ('+near.length+'): '+near.slice(0,12).map(esc).join(', ')+(near.length>12?'…':'')+'. Tocca di nuovo per passare al successivo.</div>':'';
+  const zn=spaceZone(p,NOW()),zones=zn.length?'<div class="zn">'+zn.map(esc).join('<br>')+'</div>':'';
+  c.innerHTML='<b>'+esc(sel.name)+'</b><span>NORAD '+esc(sel.id)+'</span><div class="g">'+it.map(a=>'<div><i>'+a[0]+'</i>'+(a[2]?a[1]:esc(a[1]))+'</div>').join('')+'</div>'+nearH+zones+warn;
+}
+function update(){
+  const d=NOW();for(const s of sats)s.p=pos(s,d);
+  $('#clk').textContent=simT==null?d.toISOString().slice(11,19)+' UTC':f2(d.getUTCDate())+'/'+f2(d.getUTCMonth()+1)+' '+f2(d.getUTCHours())+':'+f2(d.getUTCMinutes())+' UTC';
+  if(simT==null)syncTime();
+  draw();card();
+  if(tab==='pass'&&selPass)drawSky();
+}
+
+// ---------- interazione mappa ----------
+const ptrs=new Map();let moved=0,pd=0;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);moved=0;pd=0});
+cv.addEventListener('pointermove',e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const o=ptrs.get(e.pointerId),n=[e.clientX,e.clientY];
+  if(ptrs.size===1){const k=m3?Math.min(W,H)*.36*view.z3*R:sc();view.lon=wrap(view.lon-(n[0]-o[0])/k);view.lat+=(n[1]-o[1])/k;view.lat=Math.max(-85,Math.min(85,view.lat));moved+=Math.abs(n[0]-o[0])+Math.abs(n[1]-o[1])}
+  ptrs.set(e.pointerId,n);
+  if(ptrs.size===2){
+    const [a,b]=[...ptrs.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);
+    if(pd)zoomBy(d/pd);pd=d;moved=99;
+  }
+  draw();
+});
+cv.addEventListener('pointerup',e=>{
+  ptrs.delete(e.pointerId);
+  if(moved<8&&ptrs.size===0){
+    const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=null,bd=900;
+    for(const s of sats){const d=(s.X-x)**2+(s.Y-y)**2;if(d<bd){bd=d;best=s}}
+    if(best){   // satelliti sovrapposti (a meno di 8 px dal più vicino): tocchi ripetuti li scorrono uno dopo l'altro
+      const g=sats.filter(s=>(s.X-best.X)**2+(s.Y-best.Y)**2<64&&(s.X-x)**2+(s.Y-y)**2<900);
+      if(g.length>1){const i=g.indexOf(sel);best=g[(i+1)%g.length]}
+    }
+    sel=best;draw();card();renderPass();
+  }
+});
+$('#zi').onclick=()=>{zoomBy(1.5);draw()};
+$('#zo').onclick=()=>{zoomBy(1/1.5);draw()};
+$('#dt').onchange=e=>{const v=e.target.value;if(v){const t=Date.parse(v+':00Z');if(isFinite(t))setSim(t)}};   // il campo è in UTC
+$('#tm').onclick=()=>setSim((simT==null?Date.now():simT)-36e5);
+$('#tp').onclick=()=>setSim((simT==null?Date.now():simT)+36e5);
+$('#tn').onclick=()=>{simT=null;syncTime();update()};
+$('#zm').onclick=()=>{m3=!m3;if(!m3){belts=false;$('#zb').classList.remove('on')}$('#zm').textContent=m3?'2D':'3D';draw()};
+$('#zb').onclick=()=>{
+  belts=!belts;$('#zb').classList.toggle('on',belts);
+  if(belts){m3=true;$('#zm').textContent='2D';view.z3=Math.min(view.z3,.9)}   // zoom indietro per vedere tutti i gusci
+  draw();
+};
+
+// ---------- elenco ----------
+function renderList(){
+  const q=$('#q').value.trim().toLowerCase(),box=$('#rows');
+  const r=sats.filter(s=>!q||s.name.toLowerCase().includes(q)||s.id.includes(q)).slice(0,80);
+  box.innerHTML=r.length?'':'<p class="m">Nessun satellite trovato.</p>';
+  if(/^\d{1,9}$/.test(q)){
+    const b=document.createElement('button');b.className='btn';b.textContent='Mostra solo NORAD '+q;
+    b.style.margin='4px 0 10px';b.onclick=()=>loadOne(q);box.prepend(b);
+  }
+  r.forEach(s=>{
+    const d=document.createElement('div');d.className='row';
+    d.innerHTML='<div>'+esc(s.name)+'</div><span>'+esc(s.id)+'</span>';
+    d.onclick=()=>{sel=s;if(s.p){view.lon=s.p.lon;view.lat=s.p.lat}show('map');renderPass()};
+    box.appendChild(d);
+  });
+}
+$('#q').oninput=renderList;
+$('#q').onkeydown=e=>{const v=$('#q').value.trim();if(e.key==='Enter'&&/^\d{1,9}$/.test(v))loadOne(v)};
+
+// ---------- passaggi ----------
+function passes(s){
+  const og={latitude:obs.lat*R,longitude:obs.lon*R,height:.1},out=[],t0=Date.now();let cur=null;
+  for(let k=0;k<2880;k++){
+    const d=new Date(t0+k*3e4),pv=satellite.propagate(s.rec,d);if(!pv||!pv.position)continue;
+    const la=satellite.ecfToLookAngles(og,satellite.eciToEcf(pv.position,satellite.gstime(d))),el=la.elevation/R;
+    if(el>0){if(!cur)cur={start:d,max:el,az:la.azimuth/R};cur.end=d;if(el>cur.max)cur.max=el}
+    else if(cur){out.push(cur);cur=null}
+  }
+  if(cur)out.push(cur);
+  return out.filter(p=>p.max>=10);
+}
+// ---------- grafico della volta celeste ----------
+let PL=[],selPass=null;
+const C16=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+const card16=a=>C16[Math.round(a/22.5)%16];
+const hms=t=>new Date(t).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function lookAt(s,d){
+  const og={latitude:obs.lat*R,longitude:obs.lon*R,height:.1},pv=satellite.propagate(s.rec,d);
+  if(!pv||!pv.position)return null;
+  const la=satellite.ecfToLookAngles(og,satellite.eciToEcf(pv.position,satellite.gstime(d)));
+  return{t:d.getTime(),az:((la.azimuth/R)%360+360)%360,el:la.elevation/R,rng:la.rangeSat};
+}
+function skyPts(s,p){
+  const out=[];
+  for(let t=p.start.getTime()-3e4;t<=p.end.getTime()+3e4;t+=5e3){const q=lookAt(s,new Date(t));if(q&&q.el>=0)out.push(q)}
+  return out;
+}
+function selectPass(i){
+  selPass=PL[i];if(!selPass)return;
+  selPass.pts=skyPts(sel,selPass);
+  document.querySelectorAll('#pass .row[data-i]').forEach((r,j)=>r.classList.toggle('on',j===i));
+  $('#skyc').hidden=false;drawSky();$('#pass').scrollTop=0;
+}
+function drawSky(){
+  const p=selPass,pts=p&&p.pts;if(!pts||!pts.length||!sel||!obs)return;
+  const c=$('#skc'),S=c.getBoundingClientRect().width;if(!S)return;
+  const dpr=devicePixelRatio||1;c.width=S*dpr;c.height=S*dpr;
+  const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  const cx=S/2,cy=S/2,Rr=S/2-24;
+  // visto guardando il cielo: nord in alto, est a sinistra, zenit al centro, orizzonte sul bordo
+  const xy=(az,el)=>{const r=(90-el)/90*Rr,a=az*R;return[cx-r*Math.sin(a),cy-r*Math.cos(a)]};
+  g.lineWidth=1;g.strokeStyle='#232c37';
+  [0,30,60].forEach(e=>{g.beginPath();g.arc(cx,cy,(90-e)/90*Rr,0,7);g.stroke()});
+  g.strokeStyle='#18202a';g.beginPath();
+  for(let a=0;a<360;a+=30){const q=xy(a,0);g.moveTo(cx,cy);g.lineTo(q[0],q[1])}
+  g.stroke();
+  g.fillStyle='#7b8490';g.font='12px system-ui';g.textBaseline='middle';g.textAlign='center';
+  [['N',0],['E',90],['S',180],['O',270]].forEach(([t,a])=>{g.fillText(t,cx-(Rr+13)*Math.sin(a*R),cy-(Rr+13)*Math.cos(a*R))});
+  g.font='10px system-ui';g.textAlign='left';
+  [30,60].forEach(e=>g.fillText(e+'°',cx+3,cy-(90-e)/90*Rr-7));
+  // traiettoria
+  g.strokeStyle='#f2b84b';g.lineWidth=2;g.lineJoin='round';g.beginPath();
+  pts.forEach((q,i)=>{const [X,Y]=xy(q.az,q.el);i?g.lineTo(X,Y):g.moveTo(X,Y)});g.stroke();
+  const a0=pts[0],a1=pts[pts.length-1],mx=pts.reduce((m,q)=>q.el>m.el?q:m,pts[0]);
+  const lab=(q,txt,out)=>{
+    const [X,Y]=xy(q.az,q.el);g.fillStyle='#e8eaed';g.font='11px system-ui';
+    if(out){const dx=X-cx,dy=Y-cy,d=Math.hypot(dx,dy)||1;g.textAlign=dx<0?'right':'left';g.fillText(txt,X+dx/d*10+(dx<0?-2:2),Y+dy/d*10)}
+    else{g.textAlign='left';g.fillText(txt,X+8,Y-9)}
+  };
+  let [X,Y]=xy(a0.az,a0.el);g.fillStyle='#0c0f14';g.strokeStyle='#e8eaed';g.lineWidth=1.5;g.beginPath();g.arc(X,Y,4,0,7);g.fill();g.stroke();lab(a0,hms(a0.t).slice(0,5),true);
+  [X,Y]=xy(a1.az,a1.el);g.fillStyle='#e8eaed';g.beginPath();g.arc(X,Y,3.5,0,7);g.fill();lab(a1,hms(a1.t).slice(0,5),true);
+  [X,Y]=xy(mx.az,mx.el);g.fillStyle='#f2b84b';g.beginPath();g.arc(X,Y,5,0,7);g.fill();lab(mx,Math.round(mx.el)+'°',false);
+  // posizione attuale, se il satellite è in vista
+  const now=lookAt(sel,new Date()),live=now&&now.el>=0?now:null;
+  if(live){
+    [X,Y]=xy(live.az,live.el);g.strokeStyle='rgba(242,184,75,.5)';g.lineWidth=1.5;g.beginPath();g.arc(X,Y,10,0,7);g.stroke();
+    g.fillStyle='#fff';g.beginPath();g.arc(X,Y,3,0,7);g.fill();
+  }
+  const row=(l,q)=>'<i>'+l+'</i><span>'+hms(q.t)+'</span><span>'+Math.round(q.az)+'° '+card16(q.az)+'</span><span>'+Math.round(q.el)+'°</span>';
+  $('#skh').innerHTML='<b>'+esc(sel.name)+'</b> <span class="m">'+p.start.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})+'</span>';
+  const dur=Math.round((a1.t-a0.t)/1000);
+  $('#skt').innerHTML='<div class="tb"><i></i><i>Ora</i><i>Azimut</i><i>Elev.</i>'+row('Inizio',a0)+row('Culmine',mx)+row('Fine',a1)+(live?row('Adesso',live):'')+'</div>'+
+    '<p class="m" style="margin-top:10px;font-size:13px">Durata '+Math.floor(dur/60)+' min '+String(dur%60).padStart(2,'0')+' s, distanza al culmine '+Math.round(mx.rng)+' km'+(live?', adesso '+Math.round(live.rng)+' km':'')+'. Azimut da nord in senso orario; grafico visto guardando verso l’alto.</p>';
+}
+function renderPass(){
+  const el=$('#pass');
+  if(!sel){el.innerHTML='<p class="m">Scegli un satellite dalla mappa o dall’elenco per vedere i suoi passaggi.</p>';return}
+  if(!obs){
+    el.innerHTML='<p class="m">Serve la tua posizione per calcolare i passaggi.</p><div class="f"><input id="la" placeholder="Latitudine" inputmode="decimal"><input id="lo" placeholder="Longitudine" inputmode="decimal"></div><button class="btn" id="ok">Calcola</button> <button class="btn" id="gps" style="background:var(--btn2);color:var(--fg)">Usa il GPS</button>';
+    $('#ok').onclick=()=>{const a=parseFloat($('#la').value.replace(',','.')),b=parseFloat($('#lo').value.replace(',','.'));if(isFinite(a)&&isFinite(b)){obs={lat:a,lon:b};renderPass();draw()}};
+    $('#gps').onclick=()=>{
+      if(!window.isSecureContext||!navigator.geolocation){status('Il GPS funziona solo se la pagina è aperta da un indirizzo https (o localhost). Da un file locale ('+location.protocol+') il browser lo blocca: inserisci la posizione a mano.');return}
+      status('Cerco la posizione…');
+      navigator.geolocation.getCurrentPosition(p=>{obs={lat:p.coords.latitude,lon:p.coords.longitude};status('Posizione trovata.');renderPass();draw()},
+        e=>status(e.code===1?'Permesso di posizione negato: abilitalo nelle impostazioni del sito del browser, oppure inserisci la posizione a mano.':e.code===3?'Il GPS non ha risposto in tempo: riprova all’aperto o inserisci la posizione a mano.':'Posizione non disponibile sul dispositivo: inseriscila a mano.'),
+        {enableHighAccuracy:false,timeout:15000,maximumAge:6e5});
+    };
+    return;
+  }
+  PL=passes(sel);selPass=null;
+  el.innerHTML='<div id="skyc" hidden><div id="skh"></div><canvas id="skc"></canvas><div id="skt"></div></div>'+
+    '<p><b>'+esc(sel.name)+'</b> <span class="m">prossime 24 ore, elevazione massima da 10°. Tocca un passaggio per vederlo nel cielo.</span></p>'+
+    (PL.length?PL.map((p,i)=>'<div class="row" data-i="'+i+'"><div>'+p.start.toLocaleString('it-IT',{weekday:'short',hour:'2-digit',minute:'2-digit'})+'</div><span>'+Math.max(1,Math.round((p.end-p.start)/6e4))+' min, max '+Math.round(p.max)+'°, da '+Math.round(p.az)+'° '+card16(p.az)+'</span></div>').join(''):'<p class="m">Nessun passaggio utile nelle prossime 24 ore.</p>');
+  el.querySelectorAll('.row[data-i]').forEach(r=>r.onclick=()=>selectPass(+r.dataset.i));
+}
+
+// ---------- scheda Zone: ingressi e uscite da SAA e cuspidi polari ----------
+const ZK=['SAA','CN','CS'],ZN={SAA:'SAA',CN:'Cuspide nord',CS:'Cuspide sud'},ZMAX=14*864e5;
+let zFrom=null,zTo=null,zUTC=true,zRes=null,zTok=0,zBuilt=false;
+const f2=n=>String(n).padStart(2,'0');
+// stato [SAA, cuspide nord, cuspide sud] del satellite all'istante t (ms)
+function zoneKeys(s,t){
+  const d=new Date(t),p=pos(s,d);if(!p)return[false,false,false];
+  const z=spaceZone(p,d);
+  return[z.some(x=>x.startsWith('SAA')),z.includes('Cuspide polare nord'),z.includes('Cuspide polare sud')];
+}
+// Cerca gli intervalli in cui il satellite è dentro le zone tra t0 e t1: campiona ogni 10-30 s e affina i confini a circa 1 s.
+// tick(frazione) può restituire true per interrompere la ricerca.
+async function zoneScan(s,t0,t1,tick){
+  const step=(t1-t0)<=2*864e5?1e4:(t1-t0)<=7*864e5?2e4:3e4,out=[],open=[null,null,null];
+  let prev=zoneKeys(s,t0);prev.forEach((v,i)=>{if(v)open[i]={a:null}});
+  const bis=(i,lo,hi,s0)=>{while(hi-lo>1000){const m=(lo+hi)/2;if(zoneKeys(s,m)[i]===s0)lo=m;else hi=m}return hi};
+  let t=t0,n=0;
+  while(t<t1){
+    const tn=Math.min(t+step,t1),cur=zoneKeys(s,tn);
+    for(let i=0;i<3;i++){
+      if(!prev[i]&&cur[i])open[i]={a:bis(i,t,tn,false)};
+      else if(prev[i]&&!cur[i]){out.push({k:ZK[i],a:open[i].a,b:bis(i,t,tn,true)});open[i]=null}
+    }
+    prev=cur;t=tn;
+    if(tick&&++n%3000===0&&(await tick((t-t0)/(t1-t0))))return null;
+  }
+  open.forEach((o,i)=>{if(o)out.push({k:ZK[i],a:o.a,b:null})});
+  return out.sort((x,y)=>(x.a==null?t0:x.a)-(y.a==null?t0:y.a));
+}
+function fmtZ(ms,withDate){
+  const d=new Date(ms),u=zUTC,v=u?[d.getUTCDate(),d.getUTCMonth()+1,d.getUTCHours(),d.getUTCMinutes(),d.getUTCSeconds()]:[d.getDate(),d.getMonth()+1,d.getHours(),d.getMinutes(),d.getSeconds()];
+  return(withDate?f2(v[0])+'/'+f2(v[1])+' ':'')+f2(v[2])+':'+f2(v[3])+':'+f2(v[4]);
+}
+const zDur=(a,b)=>{const q=Math.round((b-a)/1000);return q>=60?Math.floor(q/60)+' min '+f2(q%60)+' s':q+' s'};
+const zIn=ms=>zUTC?new Date(ms).toISOString().slice(0,16):toLocalInput(ms);
+const zParse=v=>zUTC?Date.parse(v+':00Z'):new Date(v).getTime();
+function zSync(){$('#zf0').value=zIn(zFrom);$('#zf1').value=zIn(zTo);$('#zutc').textContent=zUTC?'Orari in UTC':'Orari locali'}
+function zPreset(q){
+  const b=simT==null?Date.now():simT,d=q.endsWith('24')?864e5:7*864e5;
+  if(q[0]==='n'){zFrom=b;zTo=b+d}else{zFrom=b-d;zTo=b}
+  zSync();zoneRun();
+}
+function buildZone(){
+  $('#zone').innerHTML='<div id="zh"></div>'+
+    '<div class="zc"><label>Da<input type="datetime-local" id="zf0"></label><label>A<input type="datetime-local" id="zf1"></label></div>'+
+    '<div class="zq"><button data-q="n24">Prossime 24 h</button><button data-q="p24">Ultime 24 h</button><button data-q="n7">Prossimi 7 giorni</button><button data-q="p7">Ultimi 7 giorni</button></div>'+
+    '<div class="zq"><button class="go" id="zgo">Cerca</button><button id="zutc"></button></div>'+
+    '<div class="zq"><select id="zfil" style="grid-column:1/-1"><option value="all">Mostra tutte le zone</option><option value="SAA">Solo SAA</option><option value="C">Solo cuspidi polari</option></select></div>'+
+    '<div id="zsc" hidden><div class="zs" id="zcap1"></div><canvas id="zc1"></canvas><div class="zs" id="zst"></div></div>'+
+    '<div id="zres"></div>';
+  $('#zone').querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>zPreset(b.dataset.q));
+  $('#zf0').onchange=e=>{const t=zParse(e.target.value);if(isFinite(t))zFrom=t};
+  $('#zf1').onchange=e=>{const t=zParse(e.target.value);if(isFinite(t))zTo=t};
+  $('#zgo').onclick=zoneRun;
+  $('#zutc').onclick=()=>{zUTC=!zUTC;zSync();zoneResults()};
+  $('#zfil').onchange=zoneResults;
+  zBuilt=true;
+}
+function renderZone(){
+  if(!zBuilt)buildZone();
+  if(zFrom==null){const b=simT==null?Date.now():simT;zFrom=b;zTo=b+864e5}
+  zSync();
+  $('#zh').innerHTML=sel?'<p><b>'+esc(sel.name)+'</b> <span class="m">ingressi e uscite da SAA e cuspidi polari</span></p>':'<p class="m">Seleziona un satellite dalla mappa o dall’elenco per vedere gli ingressi e le uscite dalle zone.</p>';
+  if(sel&&(!zRes||zRes.id!==sel.id))zoneRun();
+  else zoneResults();
+}
+async function zoneRun(){
+  const el=$('#zres');
+  if(!sel){el.textContent='';return}
+  if(!(zTo>zFrom)){el.innerHTML='<p class="m">L’istante finale deve essere dopo quello iniziale.</p>';return}
+  let t1=zTo,note='';
+  if(t1-zFrom>ZMAX){t1=zFrom+ZMAX;note='Intervallo limitato a 14 giorni.'}
+  const tok=++zTok,s=sel;el.innerHTML='<p class="m">Calcolo…</p>';
+  const r=await zoneScan(s,zFrom,t1,async f=>{el.innerHTML='<p class="m">Calcolo… '+Math.round(f*100)+'%</p>';await new Promise(r=>setTimeout(r,0));return tok!==zTok});
+  if(r===null||tok!==zTok)return;
+  zRes={id:s.id,sat:s,t0:zFrom,t1,note,list:r};zSel=null;$('#zsc').hidden=true;zoneResults();
+}
+function zoneResults(){
+  const el=$('#zres');if(!el)return;
+  if(!zRes||!sel||zRes.id!==sel.id){el.innerHTML='';return}
+  const f=$('#zfil').value,L=zRes.list.filter(e=>f==='all'||(f==='SAA'?e.k==='SAA':e.k!=='SAA'));
+  const tz=zUTC?'UTC':'ora locale',T0=zRes.t0,T1=zRes.t1;
+  const sum=ZK.map(k=>{const E=zRes.list.filter(e=>e.k===k);if(!E.length)return'';
+    const tot=E.reduce((a,e)=>a+((e.b==null?T1:e.b)-(e.a==null?T0:e.a)),0);
+    return '<div><b>'+ZN[k]+'</b>: '+E.length+(E.length===1?' passaggio':' passaggi')+', '+Math.round(tot/6e4)+' min in totale</div>'}).join('');
+  const dEp=Math.max(Math.abs(T0-epoch(zRes.sat)),Math.abs(T1-epoch(zRes.sat)))/864e5;
+  const rows=L.map(e=>{
+    const a=e.a==null?'<span class="m">già dentro all’inizio</span>':fmtZ(e.a,true);
+    const sameDay=e.a!=null&&e.b!=null&&fmtZ(e.a,true).slice(0,5)===fmtZ(e.b,true).slice(0,5);
+    const b=e.b==null?'<span class="m">oltre la fine</span>':fmtZ(e.b,!sameDay);
+    return '<div class="row" data-i="'+zRes.list.indexOf(e)+'"><div><b>'+ZN[e.k]+'</b><br><span class="m">'+a+' → '+b+'</span></div><span>'+(e.a!=null&&e.b!=null?zDur(e.a,e.b):'—')+'</span></div>';
+  }).join('');
+  el.innerHTML='<div class="zs">'+fmtZ(T0,true)+' → '+fmtZ(T1,true)+' ('+tz+')'+(zRes.note?'. '+zRes.note:'')+'</div>'+
+    (zRes.list.length?'<div class="zs">'+sum+'</div><div class="zs" style="font-size:12px">Tocca una riga SAA o cuspide per vedere il grafico.</div>'+(rows||'<p class="m">Nessuna zona di questo tipo nell’intervallo.</p>'):'<p class="m">Nessun ingresso in SAA o in cuspidi polari in questo intervallo.</p>')+
+    (dEp>7?'<p class="m" style="font-size:12px;margin-top:10px">Attenzione: l’intervallo arriva a '+Math.round(dEp)+' giorni dall’epoca del TLE, gli orari sono poco precisi.</p>':'');
+  el.querySelectorAll('.row[data-i]').forEach(r=>{r.onclick=()=>zoneSection(+r.dataset.i,true);r.classList.toggle('on',zSel!=null&&+r.dataset.i===zSel)});
+  if(zSel!=null&&zRes.list[zSel])zoneSection(zSel,false);
+}
+
+// ---------- grafici di quota: sezione trasversale dell'orbita attraverso la SAA ----------
+let zSel=null;
+function zCanvas(id,H){
+  const c=$(id),W=Math.min(560,c.parentElement.getBoundingClientRect().width||320),dpr=devicePixelRatio||1;
+  c.style.width=W+'px';c.style.height=H+'px';c.width=W*dpr;c.height=H*dpr;
+  const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);return[g,W];
+}
+const C16Z=a=>(((a+180)%360)+360)%360-180;
+function zoneSection(i,scroll){
+  const e=zRes.list[i];if(!e)return;
+  if(e.k!=='SAA')return cuspSection(i,scroll);
+  zSel=i;
+  document.querySelectorAll('#zres .row[data-i]').forEach(r=>r.classList.toggle('on',+r.dataset.i===i));
+  const s=zRes.sat,N=160,mg=10*6e4,a=(e.a==null?zRes.t0:e.a)-mg,b=(e.b==null?zRes.t1:e.b)+mg,co=magCache(new Date((a+b)/2)).co,smp=[];
+  for(let k=0;k<=N;k++){const t=a+(b-a)*k/N,p=pos(s,new Date(t));if(p)smp.push({t,lat:p.lat,lon:p.lon,alt:p.alt})}
+  if(smp.length<3)return;
+  const M=smp.length-1,amax=Math.max(...smp.map(q=>q.alt)),amin=Math.min(...smp.map(q=>q.alt));
+  const Ymax=Math.min(2000,Math.max(1200,Math.ceil(amax*1.4/200)*200)),J=48,dy=Ymax/J;
+  // campo B (nT) sui livelli di quota lungo la traccia, rapporto B/soglia SAA nelle celle e alla quota del satellite
+  const Bm=[],rn=[],rs=[],Bs=[];
+  for(let k=0;k<=M;k++){
+    const q=smp[k],col=[],rc=[];
+    for(let j=0;j<=J;j++){const bj=igrfB(q.lat,q.lon,j*dy,co);col.push(bj);rc.push(bj/saaT(j*dy))}
+    Bm.push(col);rn.push(rc);Bs.push(igrfB(q.lat,q.lon,q.alt,co));rs.push(saaRatio(q.lat,q.lon,q.alt,co));
+  }
+  $('#zsc').hidden=false;
+  $('#zcap1').innerHTML='<b>Sezione dell’orbita lungo la traccia a terra</b>: quota (km) nel tempo.<div class="lg">'+
+    '<span class="lgi"><i class="s-grad"></i>Campo debole (più chiaro)</span>'+
+    '<span class="lgi"><i class="s-dash"></i>Campo costante (20, 24, 28 µT)</span>'+
+    '<span class="lgi"><i class="s-amb"></i>Contorno SAA (per i segnali)</span>'+
+    '<span class="lgi"><i class="s-wht"></i>Quota del satellite</span>'+
+    '<span class="lgi"><i class="s-org"></i>Satellite dentro la SAA</span>'+
+    '<span class="lgi"><i class="s-vert"></i>Ingresso e uscita</span></div>';
+  const H=254,ml=50,mr=10,mt=16,mb=46,[g,W]=zCanvas('#zc1',H),w=W-ml-mr,h=H-mt-mb,X=k=>ml+w*k/M,Y=v=>mt+h*(1-v/Ymax);
+  // colore: campo debole = più intenso (sfondo #0c0f14 miscelato con l'ambra)
+  for(let k=0;k<M;k++)for(let j=0;j<J;j++){
+    const Bc=(Bm[k][j]+Bm[k][j+1])/2,t=Math.max(0,Math.min(1,(30000-Bc)/12000));if(t<.02)continue;
+    const al=.62*t;g.fillStyle='rgb('+[0,1,2].map(i=>Math.round(TH.base[i]+(TH.amb[i]-TH.base[i])*al)).join(',')+')';
+    g.fillRect(X(k),Y((j+1)*dy),X(k+1)-X(k)+.6,Y(j*dy)-Y((j+1)*dy)+.6);
+  }
+  // quote e superficie
+  const st=Ymax>1400?500:200;g.font='11px system-ui';g.textBaseline='middle';g.textAlign='right';g.lineWidth=1;
+  for(let v=0;v<=Ymax;v+=st){g.strokeStyle=v?'#1f2630':'#3a4552';g.beginPath();g.moveTo(ml,Y(v));g.lineTo(ml+w,Y(v));g.stroke();g.fillStyle='#7b8490';g.fillText(v+' km',ml-6,Y(v))}
+  // linee a campo costante: quota alla quale B vale il livello, colonna per colonna
+  g.setLineDash([3,3]);g.strokeStyle='rgba(232,234,237,.45)';g.lineWidth=1;g.textAlign='left';g.fillStyle='rgba(232,234,237,.7)';
+  for(const lv of[20000,24000,28000]){
+    g.beginPath();let on=false,lab=null;
+    for(let k=0;k<=M;k++){
+      let yv=null;for(let j=0;j<J;j++)if(Bm[k][j]>=lv&&Bm[k][j+1]<lv){yv=(j+(Bm[k][j]-lv)/(Bm[k][j]-Bm[k][j+1]))*dy;break}
+      if(yv==null){on=false;continue}
+      on?g.lineTo(X(k),Y(yv)):g.moveTo(X(k),Y(yv));on=true;if(!lab)lab=[X(k),Y(yv)];
+    }
+    g.stroke();if(lab)g.fillText(lv/1000+' µT',lab[0]+3,lab[1]-6);
+  }
+  g.setLineDash([]);
+  // contorno completo della zona SAA (B/soglia = 1): fianchi, bordo inferiore e superiore (marching squares)
+  g.strokeStyle='rgba(242,184,75,.95)';g.lineWidth=1.5;g.beginPath();
+  for(let k=0;k<M;k++)for(let j=0;j<J;j++){
+    const va=rn[k][j],vb=rn[k+1][j],vc=rn[k+1][j+1],vd=rn[k][j+1],ix=(va<1?1:0)|(vb<1?2:0)|(vc<1?4:0)|(vd<1?8:0);
+    if(ix===0||ix===15)continue;
+    const x0=X(k),x1=X(k+1),y0=Y(j*dy),y1=Y((j+1)*dy),lp=(p,q)=>(1-p)/(q-p);
+    const P={L:()=>[x0,y0+(y1-y0)*lp(va,vd)],B:()=>[x0+(x1-x0)*lp(va,vb),y0],R:()=>[x1,y0+(y1-y0)*lp(vb,vc)],T:()=>[x0+(x1-x0)*lp(vd,vc),y1]};
+    const seg=(p,q)=>{const u=P[p](),v=P[q]();g.moveTo(u[0],u[1]);g.lineTo(v[0],v[1])},mid=(va+vb+vc+vd)/4<1;
+    switch(ix){
+      case 1:case 14:seg('L','B');break;
+      case 2:case 13:seg('B','R');break;
+      case 3:case 12:seg('L','R');break;
+      case 4:case 11:seg('R','T');break;
+      case 6:case 9:seg('B','T');break;
+      case 7:case 8:seg('L','T');break;
+      case 5:if(mid){seg('B','R');seg('L','T')}else{seg('L','B');seg('R','T')}break;
+      case 10:if(mid){seg('L','B');seg('R','T')}else{seg('B','R');seg('L','T')}break;
+    }
+  }
+  g.stroke();
+  // ingresso e uscita
+  g.setLineDash([4,4]);g.strokeStyle='#7b8490';g.lineWidth=1;
+  for(const t of[e.a,e.b]){if(t==null||t<a||t>b)continue;const x=ml+w*(t-a)/(b-a);g.beginPath();g.moveTo(x,mt);g.lineTo(x,mt+h);g.stroke()}
+  g.setLineDash([]);
+  // quota del satellite: bianca, arancio dove è dentro la SAA
+  g.strokeStyle='#e8eaed';g.lineWidth=2;g.beginPath();smp.forEach((q,k)=>{k?g.lineTo(X(k),Y(q.alt)):g.moveTo(X(k),Y(q.alt))});g.stroke();
+  g.strokeStyle='#ff6a3d';g.lineWidth=3.5;g.beginPath();
+  for(let k=1;k<=M;k++)if(rs[k-1]<1&&rs[k]<1){g.moveTo(X(k-1),Y(smp[k-1].alt));g.lineTo(X(k),Y(smp[k].alt))}
+  g.stroke();
+  // asse del tempo e longitudine
+  g.textAlign='center';g.fillStyle='#7b8490';g.textBaseline='middle';
+  for(let n=0;n<=4;n++){const k=Math.round(M*n/4),x=X(k);g.fillText(fmtZ(smp[k].t,false).slice(0,5),x,H-mb+14);g.fillText('lon '+Math.round(C16Z(smp[k].lon))+'°',x,H-mb+29)}
+  // riepilogo: campo sul percorso e, sulla stessa traccia, a quote diverse
+  let rmin=9,kmin=0;for(let k=0;k<=M;k++)if(rs[k]<rmin){rmin=rs[k];kmin=k}
+  const verdict=rmin>=1?'non entra':rmin>=.95?'sfiora l’anomalia':'affonda nell’anomalia',uT=v=>(v/1000).toFixed(1).replace('.',',');
+  const bAt=v=>{let m=1e9;for(let k=0;k<=M;k++)m=Math.min(m,igrfB(smp[k].lat,smp[k].lon,v,co));return m};
+  $('#zst').innerHTML='Quota del satellite: '+Math.round(amin)+(Math.round(amax)!==Math.round(amin)?'–'+Math.round(amax):'')+' km. '+
+    'Campo minimo sul percorso: '+uT(Bs[kmin])+' µT alle '+fmtZ(smp[kmin].t,false).slice(0,5)+' ('+tz1()+'), il '+Math.round(rmin*100)+'% della soglia SAA a quella quota: <b>'+verdict+'</b>. '+
+    'Sulla stessa traccia il campo minimo sarebbe '+uT(bAt(200))+' µT a 200 km, '+uT(bAt(600))+' µT a 600 km e '+uT(bAt(1000))+' µT a 1000 km: più si sale, più il campo si indebolisce e la zona a campo debole si allarga.'+
+    (amax>2000?' Oltre i 2000 km la SAA non è definita in questo modello.':'');
+  if(scroll)$('#zone').scrollTop=0;
+}
+// ---------- grafico delle cuspidi: latitudine e ora magnetica nel tempo ----------
+function cuspGeo(s,t){
+  const d=new Date(t),p=pos(s,d);if(!p)return null;
+  const M=magCache(d),m=geoToMag(p.lat,p.lon,M.pole),sn=sun(t),ms=geoToMag(sn.dec,sn.lon,M.pole);
+  return{t,mlat:Math.abs(m.lat),mlt:(((12+(m.lon-ms.lon)/15)%24)+24)%24};
+}
+const inCusp=q=>q.mlat>=CUSP[0]&&q.mlat<=CUSP[1]&&q.mlt>=CUSP[2]&&q.mlt<=CUSP[3];
+const fmtMLT=h=>{let hh=Math.floor(h),mm=Math.round((h-hh)*60);if(mm===60){hh++;mm=0}return f2(hh%24)+':'+f2(mm)};
+function cuspSection(i,scroll){
+  const e=zRes.list[i];if(!e||e.k==='SAA')return;
+  zSel=i;
+  document.querySelectorAll('#zres .row[data-i]').forEach(r=>r.classList.toggle('on',+r.dataset.i===i));
+  const s=zRes.sat,north=e.k==='CN',ea=e.a==null?zRes.t0:e.a,eb=e.b==null?zRes.t1:e.b,mid=(ea+eb)/2,half=Math.min(90*6e4,Math.max(24*6e4,(eb-ea)/2+14*6e4));
+  const a=mid-half,b=mid+half,N=240,smp=[];
+  for(let k=0;k<=N;k++){const q=cuspGeo(s,a+(b-a)*k/N);if(q)smp.push(q)}
+  if(smp.length<3)return;
+  $('#zsc').hidden=false;
+  $('#zcap1').innerHTML='<b>Cuspide '+(north?'nord':'sud')+': latitudine e ora magnetica nel tempo</b>. La cuspide è dove le due condizioni sono vere insieme.<div class="lg">'+
+    '<span class="lgi"><i class="s-wht"></i>Satellite</span>'+
+    '<span class="lgi"><i class="s-org"></i>Satellite dentro la cuspide</span>'+
+    '<span class="lgi"><i class="s-band"></i>Finestra della cuspide</span>'+
+    '<span class="lgi"><i class="s-vert"></i>Ingresso e uscita</span></div>';
+  const [g,W]=zCanvas('#zc1',385),ml=46,mr=14,w=W-ml-mr,X=t=>ml+w*(t-a)/(b-a);
+  g.font='11px system-ui';g.textBaseline='middle';
+  const panel=(y0,h,lo,hi,get,b0,b1,ticks,label,fmtT,brk)=>{
+    const Y=v=>y0+h*(1-(v-lo)/(hi-lo));
+    g.fillStyle='rgba(242,184,75,.16)';g.fillRect(ml,Y(b1),w,Y(b0)-Y(b1));
+    g.lineWidth=1;g.textAlign='right';g.fillStyle='#7b8490';
+    ticks.forEach(t=>{g.strokeStyle='#1f2630';g.beginPath();g.moveTo(ml,Y(t));g.lineTo(ml+w,Y(t));g.stroke();g.fillText(fmtT(t),ml-6,Y(t))});
+    g.strokeStyle='rgba(242,184,75,.9)';g.setLineDash([4,3]);[b0,b1].forEach(v=>{g.beginPath();g.moveTo(ml,Y(v));g.lineTo(ml+w,Y(v));g.stroke()});g.setLineDash([]);
+    g.strokeStyle='#e8eaed';g.lineWidth=2;g.lineJoin='round';g.beginPath();let on=false,pv=null;
+    smp.forEach(q=>{const v=get(q);if(v<lo||v>hi){on=false;pv=null;return}if(pv!==null&&brk&&Math.abs(v-pv)>brk)on=false;on?g.lineTo(X(q.t),Y(v)):g.moveTo(X(q.t),Y(v));on=true;pv=v});g.stroke();
+    g.strokeStyle='#ff6a3d';g.lineWidth=4;g.beginPath();on=false;
+    smp.forEach(q=>{if(!inCusp(q)){on=false;return}const v=get(q);on?g.lineTo(X(q.t),Y(v)):g.moveTo(X(q.t),Y(v));on=true});g.stroke();
+    g.textAlign='left';g.fillStyle='#7b8490';g.fillText(label,ml,y0-11);
+  };
+  const y1=24,h1=140,y2=y1+h1+46,h2=140;
+  panel(y1,h1,50,90,q=>q.mlat,CUSP[0],CUSP[1],[50,60,70,80,90],'Latitudine geomagnetica '+(north?'nord':'sud')+' (banda '+CUSP[0]+'°–'+CUSP[1]+'°)',t=>t+'°');
+  panel(y2,h2,0,24,q=>q.mlt,CUSP[2],CUSP[3],[0,6,12,18,24],'Ora locale magnetica (banda '+fmtMLT(CUSP[2])+'–'+fmtMLT(CUSP[3])+')',t=>f2(t)+':00',12);
+  // intervallo di cuspide su entrambi i pannelli
+  g.fillStyle='rgba(255,106,61,.16)';
+  const xa=X(Math.max(a,ea)),xb=X(Math.min(b,eb));
+  if(e.a!=null||e.b!=null||true){g.fillRect(xa,y1,Math.max(2,xb-xa),h1);g.fillRect(xa,y2,Math.max(2,xb-xa),h2)}
+  g.setLineDash([3,3]);g.strokeStyle='#ff6a3d';g.lineWidth=1;
+  [e.a,e.b].forEach(t=>{if(t==null||t<a||t>b)return;g.beginPath();g.moveTo(X(t),y1);g.lineTo(X(t),y2+h2);g.stroke()});g.setLineDash([]);
+  // asse del tempo
+  const yb=y2+h2;g.strokeStyle='#3a4552';g.beginPath();g.moveTo(ml,yb);g.lineTo(ml+w,yb);g.stroke();
+  g.textAlign='center';g.fillStyle='#7b8490';
+  for(let t=Math.ceil(a/6e5)*6e5;t<=b;t+=6e5)g.fillText(fmtZ(t,false).slice(0,5),X(t),yb+14);
+  g.textAlign='right';g.fillText(zUTC?'UTC':'ora locale',ml+w,yb+30);
+  // riepilogo: ingresso, uscita e quanto è profondo l'attraversamento
+  const inside=smp.filter(inCusp),dp=q=>Math.min(Math.min(q.mlat-CUSP[0],CUSP[1]-q.mlat)/((CUSP[1]-CUSP[0])/2),Math.min(q.mlt-CUSP[2],CUSP[3]-q.mlt)/((CUSP[3]-CUSP[2])/2));
+  let txt='<b>'+(e.a!=null?fmtZ(e.a,false):'già dentro all’inizio')+' → '+(e.b!=null?fmtZ(e.b,false):'oltre la fine')+'</b> ('+tz1()+')'+(e.a!=null&&e.b!=null?', durata '+zDur(e.a,e.b):'')+'. ';
+  if(inside.length){
+    const deep=inside.reduce((m,q)=>dp(q)>dp(m)?q:m,inside[0]),dN=Math.max(0,dp(deep));
+    txt+='Punto più interno: latitudine geomagnetica '+deep.mlat.toFixed(1).replace('.',',')+'°, ora magnetica '+fmtMLT(deep.mlt)+'. Penetrazione massima '+Math.round(dN*100)+'% (0% = bordo, 100% = centro della finestra): <b>'+(dN<.35?'attraversa solo un angolo':dN<.65?'attraversa la finestra':'attraversa il centro')+'</b>. ';
+  }
+  const top=Math.max(...smp.map(q=>q.mlat));
+  txt+='Latitudine massima nell’intervallo: '+top.toFixed(1).replace('.',',')+'°. La finestra è fissa: la cuspide reale si sposta con il vento solare, circa tra 70° e 86° di latitudine.';
+  $('#zst').innerHTML=txt;
+  if(scroll)$('#zone').scrollTop=0;
+}
+const tz1=()=>zUTC?'UTC':'ora locale';
+
+// ---------- navigazione ----------
+function show(t){
+  tab=t;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  $('#list').classList.toggle('on',t==='list');$('#pass').classList.toggle('on',t==='pass');$('#zone').classList.toggle('on',t==='zone');
+  if(t==='pass')renderPass();if(t==='zone')renderZone();card();draw();
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+const gs=$('#grp');
+for(const k in GROUPS){const o=document.createElement('option');o.value=k;o.textContent=GROUPS[k];gs.appendChild(o)}
+gs.onchange=()=>{
+  group=gs.value;if(group==='one')return;
+  const o=gs.querySelector('option[value=one]');if(o)o.remove();
+  load(group);
+};
+
+// ---------- importazione di TLE e OMM da file (txt, xml, json) ----------
+// Legge: TLE a 2 o 3 righe (anche con "0 " davanti al nome), OMM in XML (CCSDS), OMM in KVN, OMM in JSON.
+// Gli OMM vengono convertiti in TLE, che è il formato che SGP4 usa davvero.
+const tleSum=l=>{let c=0;for(const ch of l){if(ch>='0'&&ch<='9')c+=+ch;else if(ch==='-')c++}return c%10};
+const tleExp=v=>{
+  if(!v||!isFinite(v))return' 00000+0';
+  const sg=v<0?'-':' ',a=Math.abs(v);let e=Math.floor(Math.log10(a))+1,m=Math.round(a/Math.pow(10,e)*1e5);
+  if(m>=1e5){m=Math.round(m/10);e++}
+  return sg+String(m).padStart(5,'0')+(e<0?'-':'+')+Math.abs(e);
+};
+function ommToTLE(o){
+  const g=k=>{const v=o[k];return v==null||v===''?NaN:+v};
+  const name=String(o.OBJECT_NAME||'').trim();
+  const id=Math.round(g('NORAD_CAT_ID'));
+  if(!(id>=0)||id>99999)throw new Error(id>99999?'NORAD ID oltre 99999: il TLE classico non lo può contenere':'manca NORAD_CAT_ID');
+  let ep=String(o.EPOCH||'').trim();if(!ep)throw new Error('manca EPOCH');
+  if(!/Z$|[+-]\d\d:?\d\d$/.test(ep))ep+='Z';
+  const t=Date.parse(ep);if(isNaN(t))throw new Error('EPOCH non valida');
+  const d=new Date(t),y=d.getUTCFullYear(),doy=(t-Date.UTC(y,0,1))/864e5+1;
+  const epoch=String(y%100).padStart(2,'0')+doy.toFixed(8).padStart(12,'0');
+  const od=String(o.OBJECT_ID||'').match(/^(\d{4})-(\d{3})([A-Z]*)/);
+  const intl=od?(od[1].slice(2)+od[2]+od[3]).padEnd(8):'        ';
+  const cl=(String(o.CLASSIFICATION_TYPE||'U').trim()[0]||'U');
+  const nd=g('MEAN_MOTION_DOT')||0,ndd=g('MEAN_MOTION_DDOT')||0,bs=g('BSTAR')||0;
+  const es=Math.round(g('ELEMENT_SET_NO'))||999;
+  const need=['MEAN_MOTION','ECCENTRICITY','INCLINATION','RA_OF_ASC_NODE','ARG_OF_PERICENTER','MEAN_ANOMALY'];
+  for(const k of need)if(!isFinite(g(k)))throw new Error('manca '+k);
+  const ec=Math.round(g('ECCENTRICITY')*1e7);
+  const rv=Math.round(g('REV_AT_EPOCH'))||0;
+  const sat=String(id).padStart(5,'0');
+  let l1='1 '+sat+cl+' '+intl+' '+epoch+' '+(nd<0?'-':' ')+Math.abs(nd).toFixed(8).slice(1)+' '+tleExp(ndd)+' '+tleExp(bs)+' 0 '+String(es%10000).padStart(4,' ');
+  let l2='2 '+sat+' '+g('INCLINATION').toFixed(4).padStart(8)+' '+g('RA_OF_ASC_NODE').toFixed(4).padStart(8)+' '+String(ec).padStart(7,'0')+' '+g('ARG_OF_PERICENTER').toFixed(4).padStart(8)+' '+g('MEAN_ANOMALY').toFixed(4).padStart(8)+' '+g('MEAN_MOTION').toFixed(8).padStart(11)+String(rv%100000).padStart(5);
+  if(l1.length!==68||l2.length!==68)throw new Error('valori fuori formato');
+  return{name:name||('NORAD '+id),l1:l1+tleSum(l1),l2:l2+tleSum(l2)};
+}
+function importParse(text,fname){
+  text=text.replace(/^﻿/,'').trim();
+  const out=[],errs=[],omm=[];
+  const addOmm=o=>{try{out.push(ommToTLE(o))}catch(e){errs.push((o.OBJECT_NAME||'senza nome')+': '+e.message)}};
+  const addTLE=(n,a,b)=>{
+    if(!/^1 /.test(a)||!/^2 /.test(b))return;
+    a=a.trimEnd();b=b.trimEnd();
+    if(a.length<68||b.length<68){errs.push((n||'TLE')+': righe troppo corte');return}
+    out.push({name:n,l1:a.slice(0,69),l2:b.slice(0,69)})
+  };
+  if(/^[\[{]/.test(text)){                       // JSON
+    let j;try{j=JSON.parse(text)}catch(e){throw new Error('JSON non valido')}
+    (Array.isArray(j)?j:[j]).forEach(o=>{
+      if(o&&o.TLE_LINE1&&o.TLE_LINE2)addTLE(String(o.OBJECT_NAME||o.TLE_LINE0||'').replace(/^0 /,'').trim(),o.TLE_LINE1,o.TLE_LINE2);
+      else if(o&&typeof o==='object')addOmm(o);
+    });
+  }else if(/^<\?xml|^<[a-zA-Z]/.test(text)){      // XML (CCSDS OMM)
+    const segs=text.split(/<segment[\s>]/).slice(1);
+    (segs.length?segs:[text]).forEach(sg=>{
+      const o={};
+      sg.replace(/<([A-Z_0-9]+)(?:\s[^>]*)?>([^<]*)<\/\1>/g,(m,k,v)=>{if(!(k in o))o[k]=v.trim();return m});
+      if(o.EPOCH)addOmm(o);
+    });
+  }else if(/^\s*[A-Z_]+\s*=/m.test(text)&&/MEAN_MOTION\s*=/.test(text)){   // KVN
+    let cur={};const flush=()=>{if(cur.EPOCH)addOmm(cur);cur={}};
+    text.split(/\r?\n/).forEach(l=>{
+      const m=l.match(/^\s*([A-Z_0-9]+)\s*=\s*(.*?)\s*$/);if(!m)return;
+      if((m[1]==='OBJECT_NAME'&&cur.EPOCH)||(m[1]==='CCSDS_OMM_VERS'&&cur.EPOCH))flush();
+      cur[m[1]]=m[2];
+    });flush();
+  }else{                                           // TLE
+    const L=text.split(/\r?\n/).map(x=>x.replace(/\s+$/,'')).filter(x=>x.trim());
+    for(let i=0;i<L.length;i++){
+      if(/^1 \d/.test(L[i])&&i+1<L.length&&/^2 \d/.test(L[i+1])){
+        const prev=i>0&&!/^[12] \d/.test(L[i-1])?L[i-1].replace(/^0 /,'').trim():'';
+        addTLE(prev,L[i],L[i+1]);i++;
+      }
+    }
+  }
+  // ogni TLE deve essere accettato da SGP4
+  const ok=[];
+  out.forEach(t=>{
+    try{const r=satellite.twoline2satrec(t.l1,t.l2);if(r.error)throw 0;
+      t.id=t.l2.substr(2,5).trim();t.name=t.name||('NORAD '+t.id);ok.push(t)}
+    catch(e){errs.push(t.name+': elementi non validi per SGP4')}
+  });
+  return{sats:ok,errs};
+}
+const IMP_KEY='orbite_imp';
+let impList=[];
+try{impList=JSON.parse(localStorage.getItem(IMP_KEY)||'[]')}catch(e){impList=[]}
+const impText=()=>impList.map(t=>t.name+'\n'+t.l1+'\n'+t.l2).join('\n');
+function impUI(msg){
+  const m=$('#impm');
+  if(!msg&&!impList.length){m.hidden=true;return}
+  m.hidden=false;m.innerHTML=(msg?esc(msg)+' ':'')+(impList.length?'<span style="color:var(--mut)">Importati: '+impList.length+'.</span><button id="impx" type="button">Svuota</button>':'');
+  const x=$('#impx');if(x)x.onclick=()=>{
+    impList=[];try{localStorage.removeItem(IMP_KEY)}catch(e){}
+    const o=gs.querySelector('option[value=import]');if(o)o.remove();
+    if(group==='import'){group='stations';gs.value='stations';load('stations')}
+    impUI('Importazioni cancellate.');
+  };
+}
+function impOption(){
+  if(!impList.length)return;
+  if(!gs.querySelector('option[value=import]')){const o=document.createElement('option');o.value='import';o.textContent='Importati';gs.appendChild(o)}
+}
+function impShow(single){
+  impOption();
+  const o=gs.querySelector('option[value=one]');if(o)o.remove();
+  group='import';gs.value='import';
+  parse(impText());
+  if(single){sel=sats.find(x=>x.id===single.id)||sats[0]||null}
+  if(sel&&sel.p){view.lon=sel.p.lon;view.lat=sel.p.lat}
+  update();renderPass();
+}
+async function importFiles(files){
+  let added=[],errs=[];
+  for(const f of files){
+    try{
+      const r=importParse(await f.text(),f.name);
+      added=added.concat(r.sats);errs=errs.concat(r.errs.map(e=>f.name+' – '+e));
+      if(!r.sats.length&&!r.errs.length)errs.push(f.name+': nessun TLE o OMM riconosciuto');
+    }catch(e){errs.push(f.name+': '+e.message)}
+  }
+  if(added.length){
+    const ids=new Set(added.map(t=>t.id));
+    impList=impList.filter(t=>!ids.has(t.id)).concat(added);
+    try{localStorage.setItem(IMP_KEY,JSON.stringify(impList))}catch(e){}
+    impShow(added.length===1?added[0]:null);
+    const msg=added.length===1?'Importato '+added[0].name+' (NORAD '+added[0].id+').':'Importati '+added.length+' satelliti nel gruppo "Importati".';
+    status(msg);
+    if(added.length===1)show('map');
+    impUI(msg+(errs.length?' Scartati '+errs.length+': '+errs.slice(0,3).join('; ')+(errs.length>3?'…':'')+'.':''));
+  }else impUI('Nessun satellite importato. '+errs.slice(0,3).join('; '));
+}
+$('#imp').onclick=()=>{$('#impf').value='';$('#impf').click()};
+$('#impf').onchange=e=>{const f=[...e.target.files];if(f.length)importFiles(f)};
+impOption();impUI();
+
+$('#gear').onclick=()=>{$('#set').hidden=false};
+$('#setx').onclick=()=>{$('#set').hidden=true};
+$('#set').onclick=e=>{if(e.target.id==='set')$('#set').hidden=true};
+$('#swl').onclick=()=>setTheme(!LIGHT,true);
+addEventListener('keydown',e=>{if(e.key==='Escape')$('#set').hidden=true});
+{let l=false;try{l=localStorage.getItem('orbite_theme')==='light'}catch(e){}setTheme(l,false)}
+addEventListener('resize',size);
+syncTime();size();loadLand();loadCountries();load(group);setInterval(update,1000);
+</script>
+</body>
+</html>
