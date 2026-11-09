@@ -16,15 +16,25 @@ html,body{height:100%;background:var(--bg);color:var(--fg);font:15px/1.4 system-
 body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
 header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
 header h1{font-size:17px;font-weight:600;letter-spacing:.01em}
-header #clk{margin-left:auto}
-#gear{background:none;border:0;color:var(--mut);padding:4px;margin-left:-4px;display:flex;border-radius:8px}
-#gear svg{width:20px;height:20px}
-#set{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 56px) 14px 14px}
-#set[hidden]{display:none}
-#setp{width:100%;max-width:420px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:6px 16px 10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
-#setp .sh{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
-#setp .sh b{font-size:16px}
-#setp .sh button{background:none;border:0;color:var(--acc);font:inherit;font-weight:600;padding:4px}
+header #clk{margin-left:auto;white-space:nowrap}
+header select{min-width:0;max-width:52vw}
+header{gap:8px}
+#gear,#infb{background:none;border:0;color:var(--mut);padding:4px;margin-left:-4px;display:flex;border-radius:8px}
+#gear svg,#infb svg{width:20px;height:20px}
+#infb{margin-left:-6px;padding:4px}
+#set,#inf{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 56px) 14px 14px}
+#set[hidden],#inf[hidden]{display:none}
+#infp{max-height:calc(100dvh - 76px);overflow:auto;-webkit-overflow-scrolling:touch}
+#infp h3{font-size:14px;margin:16px 0 6px;color:var(--acc)}
+#infp p,#infp li{font-size:13px;line-height:1.5;margin:0 0 6px}
+#infp ul{padding-left:18px;margin:0 0 6px}
+#inf #infp{padding-top:0}
+#infp .sh{position:sticky;top:0;background:var(--bg);z-index:1}
+#infp .cp{font-size:11px;color:var(--mut);text-align:center;margin:18px 0 6px}
+#setp,#infp{width:100%;max-width:420px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:6px 16px 10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#setp .sh,#infp .sh{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+#setp .sh b,#infp .sh b{font-size:16px}
+#setp .sh button,#infp .sh button{background:none;border:0;color:var(--acc);font:inherit;font-weight:600;padding:4px}
 .sr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
 .sr small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
 .sw{position:relative;width:46px;height:28px;flex:none;border-radius:14px;background:var(--line);border:1px solid var(--mut);padding:0}
@@ -42,7 +52,14 @@ nav{display:flex;border-top:1px solid var(--line);padding-bottom:env(safe-area-i
 nav button{flex:1;background:none;border:0;color:var(--mut);font:inherit;font-size:14px;padding:15px 0}
 nav button.on{color:var(--acc);font-weight:600}
 #card{position:absolute;left:12px;right:12px;bottom:12px;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-#card b{font-size:16px}#card span{color:var(--mut);font-size:12px;margin-left:8px}
+#cardb b{font-size:16px}#cardb span{color:var(--mut);font-size:12px;margin-left:8px}
+#cardb .h{padding-right:30px}
+#cardx{position:absolute;top:8px;right:8px;width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--mut);border-radius:8px}
+#cardx svg{width:20px;height:20px;transition:transform .15s}
+#card.min{left:auto;width:48px;height:44px;padding:0}
+#card.min #cardb{display:none}
+#card.min #cardx{top:7px;right:9px}
+#card.min #cardx svg{transform:rotate(180deg)}
 .zc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .zc label{font-size:12px;color:var(--mut)}
 .zc input,.zq select{display:block;width:100%;margin-top:4px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 8px;font:inherit;font-size:13px;color-scheme:var(--cs)}
@@ -84,6 +101,11 @@ input[type=search],.f input{width:100%;background:var(--bg);color:var(--fg);bord
 .tm input{flex:1;min-width:0;padding:0 8px;color-scheme:var(--cs)}
 .tm button{padding:0 9px}
 .tm .tz{font-size:12px;color:var(--mut)}
+.stp{position:absolute;left:12px;top:12px;z-index:2;display:flex;gap:6px}
+.stp[hidden]{display:none}
+.stp button{background:var(--glass2);color:var(--fg);border:1px solid var(--line);border-radius:10px;height:38px;padding:0 12px;font:inherit;font-size:13px}
+.stp #stamp{color:var(--acc);border-color:var(--acc);font-weight:600}
+.stp button:disabled{opacity:.45}
 .tm button.on{color:var(--acc);border-color:var(--acc)}
 #skyc{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:4px}
 .m{color:var(--mut)}
@@ -96,17 +118,47 @@ input[type=search],.f input{width:100%;background:var(--bg);color:var(--fg);bord
 <header>
   <h1>Orbite</h1>
   <button id="gear" type="button" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  <button id="infb" type="button" aria-label="Informazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".6" fill="currentColor"/></svg></button>
   <small id="clk"></small>
   <select id="grp"></select>
 </header>
+<div id="inf" hidden><div id="infp" role="dialog" aria-label="Informazioni sull'app"><div class="sh"><b>Come funziona</b><button id="infx" type="button">Chiudi</button></div>
+<h3>Da dove arrivano i TLE</h3>
+<p>I TLE (Two-Line Elements) sono scaricati da <b>CelesTrak</b> (celestrak.org), direttamente dal telefono, senza registrazione. CelesTrak li ricava in gran parte dal catalogo dello US Space Force (Space-Track).</p>
+<ul><li>Ogni gruppo del menu (Stazioni, Meteo, GPS, Starlink, ...) è una richiesta a CelesTrak. I gruppi IRIDE usano una ricerca per nome e poi per NORAD ID.</li>
+<li>I dati sono salvati nel telefono per 6 ore, così non si scarica di continuo. Se la rete non risponde, l'app lo segnala con il motivo.</li>
+<li>Con il tasto Import (scheda Elenco) puoi caricare TLE o OMM da file. Gli OMM sono convertiti in TLE.</li>
+<li>La riga "Epoca TLE" dice a quale giorno si riferiscono gli elementi: più la data scelta è lontana, meno è precisa la posizione.</li></ul>
+<h3>Propagatore: SGP4 e SDP4</h3>
+<p>La posizione è calcolata con la libreria <b>satellite.js</b>, che implementa il modello <b>SGP4/SDP4</b>, il solo adatto ai TLE. Il risultato è nel sistema inerziale <b>TEME</b> (True Equator, Mean Equinox) e viene poi ruotato con il tempo siderale in coordinate fisse sulla Terra (latitudine, longitudine, quota).</p>
+<ul><li><b>SGP4</b> si usa per i satelliti con periodo sotto 225 minuti (quota fino a circa 5900 km, cioè quasi tutte le orbite basse). Considera lo schiacciamento terrestre (armoniche J2, J3, J4) e la resistenza dell'atmosfera tramite il coefficiente B*.</li>
+<li><b>SDP4</b> si usa da 225 minuti in su (GPS, geostazionari, orbite molto ellittiche). Aggiunge l'attrazione di Sole e Luna e gli effetti di risonanza delle orbite con periodo vicino a 12 o 24 ore.</li>
+<li>La scelta è automatica in base al periodo: non devi fare nulla.</li></ul>
+<h3>Affidabilità delle propagazioni</h3>
+<ul><li>Un TLE è preciso a circa 1 km all'epoca. L'errore cresce con il tempo, in modo indicativo di qualche km al giorno per un'orbita bassa. Cresce più in fretta con quota bassa e Sole attivo, per la resistenza dell'aria.</li>
+<li>Vale nei due versi: propagare all'indietro è impreciso quanto andare in avanti. L'app avvisa quando la data è a più di 7 giorni dall'epoca.</li>
+<li>Le manovre del satellite non sono previste. Un TLE precedente a una manovra non descrive più l'orbita dopo.</li>
+<li>Per i satelliti geostazionari l'errore cresce più lentamente, ma le correzioni periodiche di posizione lo cambiano.</li>
+<li>Per i TLE importati l'affidabilità dipende dal file. Per i dati di prova va intesa come puramente indicativa.</li></ul>
+<h3>Come è calcolata la SAA</h3>
+<p>La South Atlantic Anomaly è la zona dove il campo magnetico terrestre è più debole, e dove la fascia interna di radiazione scende a quote basse. L'app la calcola dal campo reale, non da un disegno fisso.</p>
+<ul><li><b>Modello del campo:</b> IGRF-14 (International Geomagnetic Reference Field), sviluppo in armoniche sferiche fino al grado 13. Uso i coefficienti 2025.0 e 2030.0 e li interpolo linearmente per la data scelta.</li>
+<li><b>Intensità:</b> |B| in nT, calcolata nel punto esatto del satellite (latitudine, longitudine e quota).</li>
+<li><b>Soglia:</b> il satellite è "in SAA" quando |B| è inferiore a 22 000 nT a 535 km di quota. La soglia varia con la quota come 1/r³ (l'andamento di un dipolo), quindi a quote diverse la zona cambia dimensione.</li>
+<li><b>Area di ricerca:</b> latitudine da −65° a +20°, longitudine da −130° a +45°, quota fino a 2000 km.</li>
+<li><b>Fascia di Van Allen in 3D:</b> guscio L = 1,2 di un dipolo eccentrico ricavato dagli stessi coefficienti.</li>
+<li><b>Cuspidi polari:</b> stima con il dipolo centrato. Il satellite è in cuspide se la latitudine geomagnetica è tra 75° e 82° (nord o sud) e l'ora locale magnetica tra 9:30 e 14:00. La cuspide reale si muove con il vento solare e con la stagione, circa tra 70° e 86°.</li></ul>
+<p class="m" style="font-size:12px">Le soglie sono semplificate: servono a capire quando un satellite attraversa queste regioni, non sostituiscono misure o modelli di dettaglio.</p>
+<div class="cp">All rights reserved Davide A.</div></div></div>
 <div id="set" hidden><div id="setp" role="dialog" aria-label="Impostazioni"><div class="sh"><b>Impostazioni</b><button id="setx" type="button">Chiudi</button></div>
 <div class="sr"><div>Modalità chiara<small>Colori chiari per l'uso alla luce del giorno</small></div><button id="swl" class="sw" type="button" role="switch" aria-checked="false" aria-label="Modalità chiara"></button></div></div></div>
 <main>
   <div class="tm"><button id="tm">−1h</button><input type="datetime-local" id="dt"><span class="tz">UTC</span><button id="tp">+1h</button><button id="tn" class="on">Ora</button></div>
   <div id="mv">
     <canvas id="cv"></canvas>
+    <div class="stp" id="stp" hidden><button id="stamp" type="button">Stamp</button><button id="stclr" type="button">Clear stamp</button></div>
     <div class="zoom"><button id="zb">SAA</button><button id="zm">3D</button><button id="zi">+</button><button id="zo">−</button></div>
-    <div id="card" hidden></div>
+    <div id="card" hidden><button id="cardx" type="button" aria-label="Nascondi le informazioni" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div id="cardb"></div></div>
   </div>
   <section class="pane" id="list"><div class="qr"><input type="search" id="q" placeholder="Nome o NORAD ID (Invio per cercarlo)"><button id="imp" type="button">Import</button></div><input type="file" id="impf" accept=".txt,.tle,.xml,.json,.omm,.kvn,.csv,text/plain,text/xml,application/json,application/xml" multiple hidden><div id="impm" class="m" style="font-size:12px;margin:-2px 0 8px" hidden></div><div id="rows"></div></section>
   <section class="pane" id="pass"></section>
@@ -288,7 +340,24 @@ function epoch(s){const y=s.rec.epochyr<57?2000+s.rec.epochyr:1900+s.rec.epochyr
 let simT=null;
 function NOW(){return simT==null?new Date():new Date(simT)}
 const toLocalInput=ms=>new Date(ms-new Date(ms).getTimezoneOffset()*6e4).toISOString().slice(0,16);
+// ---------- stamp: posizioni salvate sulla mappa durante la propagazione ----------
+let stamps=[];
+function stampUI(){
+  const sim=simT!=null,n=stamps.length;
+  $('#stp').hidden=!(sim||n);
+  $('#stamp').hidden=!sim;
+  const c=$('#stclr');c.hidden=!n;c.textContent='Clear stamp'+(n>1?' ('+n+')':'');
+}
+function doStamp(){
+  if(simT==null)return;
+  if(!sel||!sel.p){status('Seleziona un satellite per salvare la sua posizione.');return}
+  if(!stamps.some(x=>x.id===sel.id&&x.t===simT))stamps.push({id:sel.id,t:simT,lat:sel.p.lat,lon:sel.p.lon,alt:sel.p.alt});
+  stampUI();draw();
+  status('Posizione salvata ('+new Date(simT).toISOString().slice(11,16)+' UTC): '+stamps.length+' sullo schermo.');
+}
+const stampLabel=(x,X,Y)=>{ctx.fillStyle='#e8eaed';ctx.font='10px system-ui';ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(new Date(x.t).toISOString().slice(11,16),X+7,Y+3)};
 function syncTime(){
+  stampUI();
   $('#tn').classList.toggle('on',simT==null);
   $('#clk').style.color=simT==null?'':'var(--acc)';
   if(document.activeElement!==$('#dt'))$('#dt').value=new Date(simT==null?Date.now():simT).toISOString().slice(0,16);
@@ -366,6 +435,12 @@ function draw(){
   }
   // osservatore
   if(obs){const X=W/2+wrap(obs.lon-view.lon)*sc(),Y=py(obs.lat);ctx.strokeStyle='#7b8490';ctx.lineWidth=1.5;ctx.strokeRect(X-4,Y-4,8,8)}
+  // posizioni salvate (stamp)
+  for(const x of stamps){
+    const X=W/2+wrap(x.lon-view.lon)*sc(),Y=py(x.lat);
+    if(X<-10||X>W+30||Y<-10||Y>H+10)continue;
+    ctx.fillStyle='#f2b84b';ctx.beginPath();ctx.arc(X,Y,4,0,7);ctx.fill();stampLabel(x,X,Y);
+  }
   // satelliti
   const few=sats.length<=40,lab=[];ctx.font='11px system-ui';
   for(const q of sats){
@@ -527,6 +602,11 @@ function draw3(){
       for(let i=1;i<qs.length;i++){const a=qs[i-1],b=qs[i];if((a.h&&b.h)!==back)continue;ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1])}
       ctx.stroke();
     }
+  }
+  // posizioni salvate (stamp)
+  for(const x of stamps){
+    const q=P(ll2v(x.lon,x.lat,1+x.alt/6371));if(q[2]<0&&q[3]<1)continue;
+    ctx.fillStyle='#f2b84b';ctx.beginPath();ctx.arc(q[0],q[1],4,0,7);ctx.fill();stampLabel(x,q[0],q[1]);
   }
   // satelliti
   const few=sats.length<=40,lab=[];ctx.font='11px system-ui';
@@ -697,7 +777,7 @@ function card(){
   const near=sats.filter(o=>o!==sel&&o.p&&Math.abs(o.p.lat-p.lat)<.3&&Math.abs(wrap(o.p.lon-p.lon))<.3/Math.max(.2,Math.cos(p.lat*R))&&Math.abs(o.p.alt-p.alt)<30).map(o=>o.name);
   const nearH=near.length?'<div class="m" style="font-size:12px;margin-top:8px">Nello stesso punto ('+near.length+'): '+near.slice(0,12).map(esc).join(', ')+(near.length>12?'…':'')+'. Tocca di nuovo per passare al successivo.</div>':'';
   const zn=spaceZone(p,NOW()),zones=zn.length?'<div class="zn">'+zn.map(esc).join('<br>')+'</div>':'';
-  c.innerHTML='<b>'+esc(sel.name)+'</b><span>NORAD '+esc(sel.id)+'</span><div class="g">'+it.map(a=>'<div><i>'+a[0]+'</i>'+(a[2]?a[1]:esc(a[1]))+'</div>').join('')+'</div>'+nearH+zones+warn;
+  $('#cardb').innerHTML='<div class="h"><b>'+esc(sel.name)+'</b><span>NORAD '+esc(sel.id)+'</span></div><div class="g">'+it.map(a=>'<div><i>'+a[0]+'</i>'+(a[2]?a[1]:esc(a[1]))+'</div>').join('')+'</div>'+nearH+zones+warn;
 }
 function update(){
   const d=NOW();for(const s of sats)s.p=pos(s,d);
@@ -1273,11 +1353,23 @@ $('#imp').onclick=()=>{$('#impf').value='';$('#impf').click()};
 $('#impf').onchange=e=>{const f=[...e.target.files];if(f.length)importFiles(f)};
 impOption();impUI();
 
+$('#cardx').onclick=()=>{
+  const c=$('#card'),m=!c.classList.contains('min');
+  c.classList.toggle('min',m);
+  $('#cardx').setAttribute('aria-expanded',!m);$('#cardx').setAttribute('aria-label',m?'Mostra le informazioni':'Nascondi le informazioni');
+  try{localStorage.setItem('orbite_cardmin',m?'1':'0')}catch(e){}
+};
+try{if(localStorage.getItem('orbite_cardmin')==='1')$('#cardx').onclick()}catch(e){}
+$('#stamp').onclick=doStamp;
+$('#stclr').onclick=()=>{stamps=[];stampUI();draw();status('Posizioni salvate cancellate.')};
+$('#infb').onclick=()=>{$('#inf').hidden=false;$('#infp').scrollTop=0};
+$('#infx').onclick=()=>{$('#inf').hidden=true};
+$('#inf').onclick=e=>{if(e.target.id==='inf')$('#inf').hidden=true};
 $('#gear').onclick=()=>{$('#set').hidden=false};
 $('#setx').onclick=()=>{$('#set').hidden=true};
 $('#set').onclick=e=>{if(e.target.id==='set')$('#set').hidden=true};
 $('#swl').onclick=()=>setTheme(!LIGHT,true);
-addEventListener('keydown',e=>{if(e.key==='Escape')$('#set').hidden=true});
+addEventListener('keydown',e=>{if(e.key==='Escape'){$('#set').hidden=true;$('#inf').hidden=true}});
 {let l=false;try{l=localStorage.getItem('orbite_theme')==='light'}catch(e){}setTheme(l,false)}
 addEventListener('resize',size);
 syncTime();size();loadLand();loadCountries();load(group);setInterval(update,1000);
