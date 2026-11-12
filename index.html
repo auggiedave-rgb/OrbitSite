@@ -6,8 +6,8 @@
 <meta name="theme-color" id="thc" content="#0c0f14">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Orbite</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/5.0.0/satellite.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="lib/satellite.min.js"></script>
+<script src="lib/topojson-client.min.js"></script>
 <style>
 :root{--bg:#0c0f14;--fg:#e8eaed;--mut:#7b8490;--acc:#f2b84b;--line:#1a2029;--sea:#0c0f14;--land:#141a22;--glass:rgba(12,15,20,.92);--glass2:rgba(12,15,20,.85);--onacc:#1a1405;--btn2:#1a2029;--cs:dark;--grad:#9b7836;--org:#ff6a3d;--wht:#e8eaed;--ambl:rgba(242,184,75,.95)}
 :root[data-theme=light]{--bg:#f4f6f9;--fg:#18202a;--mut:#5a6573;--acc:#b36f00;--line:#d5dce5;--sea:#f4f6f9;--land:#d3dbe4;--glass:rgba(255,255,255,.94);--glass2:rgba(255,255,255,.9);--onacc:#fff;--btn2:#e6ebf1;--cs:light;--grad:#c98a0b;--org:#d9420f;--wht:#18202a;--ambl:rgba(179,111,0,.95)}
@@ -312,7 +312,7 @@ function fixRing(r){
 async function loadLand(){
   try{
     let j=localStorage.getItem('land');
-    if(!j){j=await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json')).text();try{localStorage.setItem('land',j)}catch(e){}}
+    if(!j){j=await (await fetch('lib/land-110m.json')).text();try{localStorage.setItem('land',j)}catch(e){}}
     const t=JSON.parse(j),f=topojson.feature(t,t.objects.land);
     const geoms=f.features?f.features.map(x=>x.geometry):[f.geometry];land=[];
     const raw=[];
@@ -636,7 +636,7 @@ function inRing(r,x,y){let c=false;for(let i=0,j=r.length-1;i<r.length;j=i++){co
 async function loadCountries(){
   try{
     let j=localStorage.getItem('countries');
-    if(!j){j=await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')).text();try{localStorage.setItem('countries',j)}catch(e){}}
+    if(!j){j=await (await fetch('lib/countries-110m.json')).text();try{localStorage.setItem('countries',j)}catch(e){}}
     const t=JSON.parse(j),f=topojson.feature(t,t.objects.countries);
     CT=f.features.map(ft=>{
       const g=ft.geometry,polys=(g.type==='Polygon'?[g.coordinates]:g.coordinates).map(p=>{
